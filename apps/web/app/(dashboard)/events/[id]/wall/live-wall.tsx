@@ -139,7 +139,8 @@ export function LiveWall({
               <span className="text-white font-medium">Live-Wall</span>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="space-y-3">
+              {/* Title */}
               <div>
                 <h1 className="text-2xl font-bold">{eventTitle}</h1>
                 <p className="text-sm text-gray-400">
@@ -147,8 +148,9 @@ export function LiveWall({
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Navigation Buttons */}
+              {/* Controls - Mobile optimiert */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Navigation Button */}
                 <Link href={`/events/${eventId}/moderate`}>
                   <Button
                     variant="outline"
@@ -165,6 +167,7 @@ export function LiveWall({
                     variant={viewMode === 'slideshow' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setViewMode('slideshow')}
+                    className="text-xs px-2"
                   >
                     🎬 Slideshow
                   </Button>
@@ -172,6 +175,7 @@ export function LiveWall({
                     variant={viewMode === 'grid' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setViewMode('grid')}
+                    className="text-xs px-2"
                   >
                     🎨 Galerie
                   </Button>
