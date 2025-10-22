@@ -78,6 +78,13 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     return () => clearInterval(interval);
   }, [isRecording, maxDuration]);
 
+  // Stream an Video-Element binden wenn verfügbar
+  useEffect(() => {
+    if (stream && liveVideoRef.current && isRecording) {
+      liveVideoRef.current.srcObject = stream;
+    }
+  }, [stream, isRecording]);
+
   // Video-Aufnahme starten
   const startRecording = async () => {
     try {
@@ -89,11 +96,6 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       setStream(mediaStream);
       setRecordingTime(0);
       setRecordedChunks([]);
-
-      // Stream an video element binden
-      if (liveVideoRef.current) {
-        liveVideoRef.current.srcObject = mediaStream;
-      }
 
       // MediaRecorder setup
       const chunks: Blob[] = [];

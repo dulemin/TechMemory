@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -59,16 +59,18 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
 
       setStream(mediaStream);
       setIsCameraOpen(true);
-
-      // Stream an video element binden
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
     } catch (err) {
       console.error('Kamera-Zugriff fehlgeschlagen:', err);
       setError('Kamera-Zugriff verweigert. Bitte erlaube den Zugriff in deinem Browser.');
     }
   };
+
+  // Stream an Video-Element binden wenn verfügbar
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
 
   // Kamera schließen
   const closeCamera = () => {
