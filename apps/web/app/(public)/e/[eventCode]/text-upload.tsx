@@ -19,6 +19,11 @@ export function TextUpload({ eventId, guestName }: TextUploadProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!guestName || !guestName.trim()) {
+      toast.error('Bitte gib zuerst deinen Namen ein');
+      return;
+    }
+
     if (!text.trim()) {
       toast.error('Bitte schreibe eine Nachricht');
       return;

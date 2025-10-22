@@ -22,8 +22,14 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const liveVideoRef = useRef<HTMLVideoElement>(null);
   const ffmpegRef = useRef<FFmpeg | null>(null);
 
   // FFmpeg laden (nur im Browser)
@@ -53,6 +59,101 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
 
     load();
   }, []);
+
+  // Recording-Timer
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const interval = setInterval(() => {
+      setRecordingTime((prev) => {
+        const newTime = prev + 1;
+        // Auto-Stop bei maxDuration
+        if (newTime >= maxDuration) {
+          stopRecording();
+        }
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRecording, maxDuration]);
+
+  // Video-Aufnahme starten
+  const startRecording = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: true,
+      });
+
+      setStream(mediaStream);
+      setRecordingTime(0);
+      setRecordedChunks([]);
+
+      // Stream an video element binden
+      if (liveVideoRef.current) {
+        liveVideoRef.current.srcObject = mediaStream;
+      }
+
+      // MediaRecorder setup
+      const chunks: Blob[] = [];
+      const recorder = new MediaRecorder(mediaStream, {
+        mimeType: 'video/webm;codecs=vp9,opus',
+      });
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        // Video-Blob erstellen
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const file = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
+
+        setSelectedFile(file);
+        setVideoDuration(recordingTime);
+
+        // Preview erstellen
+        const url = URL.createObjectURL(blob);
+        setPreview(url);
+
+        // Stream cleanup
+        mediaStream.getTracks().forEach((track) => track.stop());
+        setStream(null);
+      };
+
+      setMediaRecorder(recorder);
+      recorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Kamera/Mikrofon-Zugriff fehlgeschlagen:', err);
+      toast.error('Kamera/Mikrofon-Zugriff verweigert. Bitte erlaube den Zugriff in deinem Browser.');
+    }
+  };
+
+  // Video-Aufnahme stoppen
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
+  // Aufnahme abbrechen
+  const cancelRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    setIsRecording(false);
+    setRecordingTime(0);
+    setRecordedChunks([]);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -113,6 +214,11 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   };
 
   const handleUpload = async () => {
+    if (!guestName || !guestName.trim()) {
+      toast.error('Bitte gib zuerst deinen Namen ein');
+      return;
+    }
+
     if (!selectedFile || videoDuration > maxDuration) return;
 
     setIsUploading(true);
@@ -206,23 +312,83 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
 
   return (
     <div className="space-y-4">
+      {/* Recording-Modal */}
+      {isRecording && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl space-y-4">
+            {/* Live-Preview */}
+            <div className="relative rounded-lg overflow-hidden bg-gray-900">
+              <video
+                ref={liveVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-auto"
+              />
+
+              {/* Recording-Timer Overlay */}
+              <div className="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full flex items-center gap-2">
+                <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
+                <span className="font-mono text-lg">
+                  {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')} / {Math.floor(maxDuration / 60)}:{(maxDuration % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+
+            {/* Recording-Buttons */}
+            <div className="flex gap-2">
+              <Button
+                onClick={stopRecording}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                size="lg"
+              >
+                ⏹ Aufnahme beenden
+              </Button>
+              <Button
+                onClick={cancelRecording}
+                variant="outline"
+                size="lg"
+              >
+                Abbrechen
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File-Input (hidden) */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        capture="environment"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      {/* Upload-Buttons */}
       <div className="space-y-2">
-        <Label htmlFor="video">Video auswählen</Label>
-        <input
-          ref={fileInputRef}
-          id="video"
-          type="file"
-          accept="video/*"
-          onChange={handleFileSelect}
-          disabled={isUploading}
-          className="block w-full text-sm text-muted-foreground
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-semibold
-            file:bg-primary file:text-primary-foreground
-            hover:file:bg-primary/90
-            file:cursor-pointer cursor-pointer"
-        />
+        <Label>Video auswählen</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading || isRecording}
+            className="w-full"
+          >
+            📁 Aus Galerie
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={startRecording}
+            disabled={isUploading || isRecording}
+            className="w-full"
+          >
+            🎥 Aufnehmen
+          </Button>
+        </div>
         <p className="text-xs text-muted-foreground">
           Max. {maxDuration} Sekunden • MP4, MOV, WEBM
         </p>

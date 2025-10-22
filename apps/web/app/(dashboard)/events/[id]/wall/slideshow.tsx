@@ -47,9 +47,9 @@ export function Slideshow({ contributions }: SlideshowProps) {
   if (!currentContribution) return null;
 
   return (
-    <div className="h-full relative flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      {/* Contribution Content */}
-      <div className="w-full h-full flex items-center justify-center p-8">
+    <div className="h-full relative flex flex-col bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      {/* Contribution Content - nimmt verfügbaren Platz */}
+      <div className="flex-1 flex items-center justify-center p-8 overflow-hidden">
         {currentContribution.type === 'video' && currentContribution.content_url && (
           <div className="w-full max-w-4xl">
             <video
@@ -57,7 +57,7 @@ export function Slideshow({ contributions }: SlideshowProps) {
               src={currentContribution.content_url}
               controls
               autoPlay
-              className="w-full h-auto max-h-[70vh] rounded-lg shadow-2xl"
+              className="w-full h-auto max-h-full rounded-lg shadow-2xl"
             />
           </div>
         )}
@@ -67,7 +67,7 @@ export function Slideshow({ contributions }: SlideshowProps) {
             <img
               src={currentContribution.content_url}
               alt={`Foto von ${currentContribution.guest_name}`}
-              className="w-full h-auto max-h-[70vh] object-contain rounded-lg shadow-2xl"
+              className="w-full h-auto max-h-full object-contain rounded-lg shadow-2xl"
             />
           </div>
         )}
@@ -81,8 +81,8 @@ export function Slideshow({ contributions }: SlideshowProps) {
         )}
       </div>
 
-      {/* Overlay: Guest Name + Index */}
-      <div className="absolute bottom-8 left-8 right-8">
+      {/* Info Box - unterhalb des Contents */}
+      <div className="px-8 pb-8 pt-4">
         <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -135,15 +135,6 @@ export function Slideshow({ contributions }: SlideshowProps) {
         </Button>
       </div>
 
-      {/* Progress Indicator */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800">
-        <div
-          className="h-full bg-primary transition-all"
-          style={{
-            width: `${((currentIndex + 1) / contributions.length) * 100}%`,
-          }}
-        />
-      </div>
     </div>
   );
 }

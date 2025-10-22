@@ -157,7 +157,7 @@ export function LiveWall({
                   variant="outline"
                   size="sm"
                   onClick={toggleFullscreen}
-                  className="border-gray-700"
+                  className="border-gray-700 bg-white text-gray-900 hover:bg-gray-100"
                 >
                   {isFullscreen ? '⤓ Exit' : '⤢ Vollbild'}
                 </Button>

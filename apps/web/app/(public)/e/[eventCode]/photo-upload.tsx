@@ -20,7 +20,11 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,7 +48,79 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
     reader.readAsDataURL(file);
   };
 
+  // Kamera öffnen
+  const openCamera = async () => {
+    try {
+      setError(null);
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      });
+
+      setStream(mediaStream);
+      setIsCameraOpen(true);
+
+      // Stream an video element binden
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err) {
+      console.error('Kamera-Zugriff fehlgeschlagen:', err);
+      setError('Kamera-Zugriff verweigert. Bitte erlaube den Zugriff in deinem Browser.');
+    }
+  };
+
+  // Kamera schließen
+  const closeCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    setIsCameraOpen(false);
+  };
+
+  // Foto aufnehmen
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    // Canvas auf Video-Größe setzen
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Video-Frame auf Canvas zeichnen
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+
+    // Canvas zu Blob konvertieren
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      // Blob zu File konvertieren
+      const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      setSelectedFile(file);
+
+      // Preview erstellen
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Kamera schließen
+      closeCamera();
+    }, 'image/jpeg', 0.95);
+  };
+
   const handleUpload = async () => {
+    if (!guestName || !guestName.trim()) {
+      setError('Bitte gib zuerst deinen Namen ein');
+      return;
+    }
+
     if (!selectedFile) return;
 
     setIsUploading(true);
@@ -133,23 +209,77 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
 
   return (
     <div className="space-y-4">
+      {/* Kamera-Modal */}
+      {isCameraOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl space-y-4">
+            {/* Live-Preview */}
+            <div className="relative rounded-lg overflow-hidden bg-gray-900">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full h-auto"
+              />
+            </div>
+
+            {/* Kamera-Buttons */}
+            <div className="flex gap-2">
+              <Button
+                onClick={capturePhoto}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                size="lg"
+              >
+                📸 Foto aufnehmen
+              </Button>
+              <Button
+                onClick={closeCamera}
+                variant="outline"
+                size="lg"
+              >
+                Abbrechen
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Canvas für Foto-Capture */}
+      <canvas ref={canvasRef} className="hidden" />
+
+      {/* File-Input (hidden) */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      {/* Upload-Buttons */}
       <div className="space-y-2">
-        <Label htmlFor="photo">Foto auswählen</Label>
-        <input
-          ref={fileInputRef}
-          id="photo"
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          disabled={isUploading}
-          className="block w-full text-sm text-muted-foreground
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-semibold
-            file:bg-primary file:text-primary-foreground
-            hover:file:bg-primary/90
-            file:cursor-pointer cursor-pointer"
-        />
+        <Label>Foto auswählen</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="w-full"
+          >
+            📁 Aus Galerie
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={openCamera}
+            disabled={isUploading}
+            className="w-full"
+          >
+            📷 Aufnehmen
+          </Button>
+        </div>
         <p className="text-xs text-muted-foreground">
           Max. {maxSizeMB} MB • JPG, PNG, WEBP
         </p>
