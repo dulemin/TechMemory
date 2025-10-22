@@ -36,3 +36,9 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# MCP Config (kann sensible Daten enthalten)
+.mcp.json
+
+# Supabase Local
+.supabase/

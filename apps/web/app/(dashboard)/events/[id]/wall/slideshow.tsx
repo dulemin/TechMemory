@@ -1,0 +1,149 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+
+interface Contribution {
+  id: string;
+  type: 'video' | 'photo' | 'text';
+  guest_name: string;
+  content_url: string | null;
+  text_content: string | null;
+  created_at: string;
+}
+
+interface SlideshowProps {
+  contributions: Contribution[];
+}
+
+export function Slideshow({ contributions }: SlideshowProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const currentContribution = contributions[currentIndex];
+
+  // Auto-Rotation (alle 8 Sekunden)
+  useEffect(() => {
+    if (isPaused || contributions.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % contributions.length);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [isPaused, contributions.length]);
+
+  // Manuelle Navigation
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % contributions.length);
+  };
+
+  const goToPrev = () => {
+    setCurrentIndex(
+      (prev) => (prev - 1 + contributions.length) % contributions.length
+    );
+  };
+
+  if (!currentContribution) return null;
+
+  return (
+    <div className="h-full relative flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      {/* Contribution Content */}
+      <div className="w-full h-full flex items-center justify-center p-8">
+        {currentContribution.type === 'video' && currentContribution.content_url && (
+          <div className="w-full max-w-4xl">
+            <video
+              key={currentContribution.id}
+              src={currentContribution.content_url}
+              controls
+              autoPlay
+              className="w-full h-auto max-h-[70vh] rounded-lg shadow-2xl"
+            />
+          </div>
+        )}
+
+        {currentContribution.type === 'photo' && currentContribution.content_url && (
+          <div className="w-full max-w-4xl">
+            <img
+              src={currentContribution.content_url}
+              alt={`Foto von ${currentContribution.guest_name}`}
+              className="w-full h-auto max-h-[70vh] object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+        )}
+
+        {currentContribution.type === 'text' && (
+          <div className="max-w-3xl bg-gray-800/50 backdrop-blur-sm rounded-2xl p-12 shadow-2xl border border-gray-700">
+            <p className="text-3xl leading-relaxed text-gray-100 text-center italic">
+              "{currentContribution.text_content}"
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Overlay: Guest Name + Index */}
+      <div className="absolute bottom-8 left-8 right-8">
+        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400">Von</p>
+              <p className="text-xl font-semibold text-white">
+                {currentContribution.guest_name}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-400">
+                {currentIndex + 1} / {contributions.length}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Controls */}
+      <div className="absolute top-1/2 left-4 -translate-y-1/2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={goToPrev}
+          className="h-12 w-12 rounded-full bg-gray-900/80 backdrop-blur-sm border-gray-700 hover:bg-gray-800"
+        >
+          ←
+        </Button>
+      </div>
+
+      <div className="absolute top-1/2 right-4 -translate-y-1/2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={goToNext}
+          className="h-12 w-12 rounded-full bg-gray-900/80 backdrop-blur-sm border-gray-700 hover:bg-gray-800"
+        >
+          →
+        </Button>
+      </div>
+
+      {/* Play/Pause Toggle */}
+      <div className="absolute top-4 right-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsPaused(!isPaused)}
+          className="bg-gray-900/80 backdrop-blur-sm border-gray-700"
+        >
+          {isPaused ? '▶ Play' : '⏸ Pause'}
+        </Button>
+      </div>
+
+      {/* Progress Indicator */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800">
+        <div
+          className="h-full bg-primary transition-all"
+          style={{
+            width: `${((currentIndex + 1) / contributions.length) * 100}%`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}

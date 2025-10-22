@@ -1,135 +1,249 @@
-# Turborepo starter
+# Event Guestbook Lite
 
-This Turborepo starter is maintained by the Turborepo core team.
+Digitales Gästebuch für Events wie Hochzeiten und Partys. Gäste können per QR-Code oder Link Videos, Fotos und Nachrichten hochladen. Echtzeit-Anzeige der Beiträge als Live-Wall während des Events.
 
-## Using this example
+## 🚀 Features
 
-Run the following command:
+- **Event-Setup**: Event in unter 30 Sekunden erstellen, QR-Code generieren
+- **Gast-Uploads**: Video (60s), Fotos (5MB), Text-Nachrichten - alles browser-basiert
+- **Live-Wall**: Echtzeit-Slideshow der Beiträge während des Events
+- **Moderation**: Host kann Beiträge freigeben/ablehnen
+- **Export**: ZIP/PDF-Download der Erinnerungen, Share-Seite (30 Tage)
+- **Monetarisierung**: Stripe-Integration für Premium-Features
 
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## 📂 Projekt-Struktur
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+event-guestbook/
+├── apps/
+│   ├── web/              # Next.js Web-App (Host-Dashboard + Gast-Seite)
+│   └── mobile/           # Expo React Native App (Host-Management)
+├── packages/
+│   ├── shared/           # TypeScript Types, API-Client, Utils
+│   ├── database/         # Supabase Migrations
+│   └── ui/               # Shared UI Components
+└── supabase/             # Edge Functions (für später)
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🛠️ Tech Stack
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+| Layer | Technologie |
+|-------|------------|
+| **Mobile** | Expo (React Native) |
+| **Web** | Next.js 15 |
+| **Backend** | Supabase (Postgres + Auth + Storage + Realtime) |
+| **Payment** | Stripe (Web SDK + React Native SDK) |
+| **Styling** | Tailwind + shadcn/ui (Web), NativeWind (Mobile) |
+| **Analytics** | PostHog |
+| **Deploy** | Vercel (Web), EAS (Mobile) |
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+## 🏁 Quick Start
 
-### Develop
+### Voraussetzungen
 
-To develop all apps and packages, run the following command:
+- Node.js 18+
+- npm 10+
+- Expo CLI (optional, für Mobile-Development)
 
-```
-cd my-turborepo
+### 1. Installation
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+```bash
+# Dependencies installieren
+npm install
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+# Supabase CLI installieren (falls noch nicht vorhanden)
+npm install -g supabase
 ```
 
-### Remote Caching
+### 2. Supabase Setup
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+```bash
+# Supabase-Projekt erstellen auf supabase.com
+# Projekt-URL und Anon-Key kopieren
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+# Lokales Supabase starten (optional für Entwicklung)
+supabase init
+supabase start
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+# Migrations anwenden
+cd packages/database
+supabase db push
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### 3. Umgebungsvariablen
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+```bash
+# Web App
+cp apps/web/.env.example apps/web/.env.local
+# Trage deine Supabase-Credentials ein
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+# Mobile App
+cp apps/mobile/.env.example apps/mobile/.env
+# Trage deine Supabase-Credentials ein
 ```
 
-## Useful Links
+### 4. Development starten
 
-Learn more about the power of Turborepo:
+```bash
+# Alle Apps gleichzeitig starten
+npm run dev
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+# Nur Web-App
+cd apps/web && npm run dev
+
+# Nur Mobile-App
+cd apps/mobile && npm start
+```
+
+## 📱 Mobile App (Expo)
+
+### iOS Simulator
+
+```bash
+cd apps/mobile
+npm run ios
+```
+
+### Android Emulator
+
+```bash
+cd apps/mobile
+npm run android
+```
+
+### Expo Go (Physisches Gerät)
+
+1. Expo Go App installieren ([iOS](https://apps.apple.com/app/expo-go/id982107779) / [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
+2. QR-Code scannen nach `npm start`
+
+## 🗄️ Datenbank-Schema
+
+Siehe `packages/database/migrations/` für das vollständige Schema:
+
+- **profiles** - User-Profile (Hosts)
+- **events** - Event-Metadaten, Settings, QR-Code
+- **contributions** - Gast-Uploads (Video/Foto/Text)
+- **subscriptions** - Stripe-Abos (Free/Premium)
+
+### Lokale Typen generieren
+
+```bash
+# Nach Schema-Änderungen
+supabase gen types typescript --local > packages/shared/src/types/database.gen.ts
+```
+
+## 🎨 UI Components (shadcn/ui)
+
+```bash
+# Neue shadcn/ui-Komponente hinzufügen
+cd apps/web
+npx shadcn@latest add button
+npx shadcn@latest add card
+# etc.
+```
+
+## 📦 Package-Management
+
+Dieses Projekt nutzt **npm workspaces** und **Turborepo** für Monorepo-Management.
+
+```bash
+# Dependencies zu specific Package hinzufügen
+npm install <package> -w apps/web
+npm install <package> -w apps/mobile
+
+# Shared Package nutzen
+npm install @event-guestbook/shared -w apps/web
+```
+
+## 🧪 Testing & Build
+
+```bash
+# TypeScript-Checks
+npm run check-types
+
+# Lint
+npm run lint
+
+# Build (alle Apps)
+npm run build
+
+# Format
+npm run format
+```
+
+## 🚢 Deployment
+
+### Web (Vercel)
+
+1. Projekt in Vercel importieren
+2. Root-Directory: `apps/web`
+3. Environment-Variablen setzen
+4. Deploy!
+
+### Mobile (EAS)
+
+```bash
+cd apps/mobile
+
+# EAS-Projekt initialisieren
+npx eas init
+
+# iOS Build
+npx eas build --platform ios
+
+# Android Build
+npx eas build --platform android
+
+# App Store / Play Store Submit
+npx eas submit
+```
+
+## 💳 Stripe-Integration
+
+1. Stripe-Account erstellen
+2. Publishable Key & Secret Key kopieren
+3. Webhook-Endpoint konfigurieren: `https://your-domain.com/api/webhooks/stripe`
+4. Products & Prices in Stripe Dashboard erstellen
+5. Environment-Variablen setzen
+
+## 📊 PostHog Analytics
+
+1. PostHog-Account erstellen (posthog.com)
+2. API-Key kopieren
+3. In `.env` files eintragen
+4. Events werden automatisch getrackt
+
+## 🐛 Troubleshooting
+
+### Metro Bundler Cache (Mobile)
+
+```bash
+cd apps/mobile
+npx expo start --clear
+```
+
+### Next.js Cache (Web)
+
+```bash
+cd apps/web
+rm -rf .next
+npm run dev
+```
+
+### Supabase Verbindungsprobleme
+
+- RLS-Policies checken
+- Anon-Key korrekt?
+- Lokales Supabase läuft? (`supabase status`)
+
+## 📄 Lizenz
+
+MIT
+
+## 🤝 Contributing
+
+Pull Requests sind willkommen! Für größere Änderungen bitte erst ein Issue öffnen.
+
+---
+
+**Viel Erfolg bei der Entwicklung!** 🎉
