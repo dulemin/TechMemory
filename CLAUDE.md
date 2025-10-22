@@ -84,7 +84,7 @@ TechMemory/
 
 | Layer | Technologie | Warum? |
 |-------|-------------|--------|
-| **Frontend (Web)** | Next.js 15 (App Router) | SSR, SEO, schnelle Development-Experience |
+| **Frontend (Web)** | Next.js 14.2.21 (App Router) | SSR, SEO, Production-stabil (downgrade von 15 wegen Build-Issues) |
 | **Frontend (Mobile)** | Expo (React Native) | Cross-platform (iOS/Android), schnelle Iteration |
 | **Backend** | Supabase | Postgres DB + Auth + Storage + Realtime in einem |
 | **Database** | PostgreSQL (via Supabase) | Robust, RLS für Security, JSON-Support |
@@ -494,11 +494,13 @@ npm install browser-image-compression          # Foto-Kompression
    - **Open-Source**: Selbst-hostbar, vendor-lock-in vermeidbar
    - **Realtime**: WebSocket-Support eingebaut
 
-### 4. **Warum Next.js 15 App Router?**
+### 4. **Warum Next.js 14 App Router? (Downgrade von 15)**
+   - **Production-Stabilität**: Next.js 15 hatte Prerendering-Issues in Monorepo-Setups
    - **Server Components**: Bessere Performance, weniger Client-JS
    - **Streaming**: Progressive Rendering
    - **Built-in Optimierungen**: Image, Font, Script-Optimierung
    - **SEO**: SSR out-of-the-box
+   - **Lösung für Build-Errors**: Hybrid-Ansatz mit Pages Router `_error.js` + App Router
 
 ### 5. **Warum Expo (nicht React Native CLI)?**
    - **Managed Workflow**: Weniger Native-Code-Konfiguration
@@ -555,6 +557,21 @@ npm install browser-image-compression          # Foto-Kompression
        })
        .subscribe();
      ```
+
+### 10. **Hybrid App Router + Pages Router für Error-Handling**
+   - **Entscheidung**: Verwendung beider Router (Next.js App Router + Pages Router) im gleichen Projekt
+   - **Problem**: Next.js 15 hatte Prerendering-Fehler bei Error-Pages (styled-jsx useContext-Bug)
+   - **Lösung**:
+     - **App Router** für alle normalen Pages (`app/` Directory)
+     - **Pages Router** nur für `_error.js` und `_document.js` (`pages/` Directory)
+   - **Vorteile**:
+     - Umgeht Next.js Default Error-Pages mit styled-jsx
+     - Volle Kontrolle über Error-Rendering
+     - Production-Builds funktionieren ohne Prerendering-Errors
+   - **Implementiert**:
+     - `pages/_error.js`: Custom Error Page ohne styled-jsx
+     - `pages/_document.js`: Custom Document ohne StyleRegistry
+   - **Status**: Funktioniert mit Next.js 14.2.21 + Vercel
 
 ## 🚀 Implementierungs-Phasen
 
@@ -724,20 +741,42 @@ npm install browser-image-compression          # Foto-Kompression
 - Copy-Buttons funktionieren mit Toast-Feedback
 - Video/Text-Upload zeigt Success-Toasts
 
-### Phase 8: Stripe Payment
+### Phase 8: Stripe Payment (TODO)
 - [ ] Subscription-Tiers (Free/Premium)
 - [ ] Checkout-Flow (Web)
 - [ ] In-App-Purchase-Flow (Mobile)
 - [ ] Webhook-Handler
 - [ ] Upgrade-Prompts
 
-### Phase 9: Deploy (NÄCHSTE PHASE)
-- [ ] PostHog-Analytics
-- [ ] DSGVO-Cookie-Banner
-- [ ] Offline-Hinweis
-- [ ] Vercel-Deploy
-- [ ] EAS-Build (Mobile)
-- [ ] App-Store-Submissions (Mobile)
+### ✅ Phase 9: Production Deployment (ABGESCHLOSSEN)
+- [x] GitHub Repository Setup
+- [x] Vercel Deployment
+- [x] Environment Variables konfiguriert
+- [x] Build-Errors behoben (Next.js 14 Downgrade + Hybrid Router)
+- [x] Production Build erfolgreich
+- [ ] PostHog-Analytics (TODO)
+- [ ] DSGVO-Cookie-Banner (TODO)
+- [ ] Offline-Hinweis (TODO)
+- [ ] EAS-Build (Mobile, TODO)
+- [ ] App-Store-Submissions (Mobile, TODO)
+
+**Implementiert:**
+- GitHub Repo: https://github.com/dulemin/TechMemory
+- Vercel Live-URL: https://tech-memory-web.vercel.app (automatisch bei Git Push)
+- Continuous Deployment: Jeder Push zu `main` triggert automatischen Vercel Build
+- Environment Variables: Supabase URL + ANON_KEY in Vercel konfiguriert
+- Build-Lösung: Next.js 14.2.21 + Hybrid App/Pages Router für Error-Handling
+
+**Deployment-Workflow:**
+```bash
+# Code ändern
+git add .
+git commit -m "feat: neue Feature"
+git push origin main
+
+# Vercel deployt automatisch innerhalb ~2 Minuten
+# URL: https://tech-memory-web.vercel.app
+```
 
 ## 🐛 Bekannte Probleme
 
@@ -802,9 +841,7 @@ npm install browser-image-compression          # Foto-Kompression
 
 **Status:** ✅ Behoben - 0 TypeScript-Errors (außer shadcn/ui React-Type-Warnings)
 
-### ⚠️ Aktive Probleme
-
-#### 1. Production Build schlägt fehl (Next.js 15 Upstream-Issue)
+#### 6. Next.js 15 Production Build Prerendering-Fehler (BEHOBEN)
 
 **Problem:**
 ```
@@ -812,13 +849,31 @@ Error occurred prerendering page "/404"
 [TypeError: Cannot read properties of null (reading 'useContext')]
 ```
 
-**Status:** Bekanntes Problem mit Next.js 15 in Monorepo-Setups (Upstream-Issue)
+**Ursache:** Next.js 15 hatte einen Bug mit styled-jsx und Server-Side Rendering in Monorepo-Setups
 
-**Workaround:**
-- **Dev-Modus funktioniert** (`npm run dev`)
-- Für Production: Warten auf Next.js-Update
+**Lösung (2-stufig):**
+1. **Downgrade auf Next.js 14.2.21** (stabile Version ohne Prerendering-Bug)
+   ```bash
+   # In apps/web/package.json
+   "next": "14.2.21"  # statt "^15.5.0"
+   ```
 
-**Auswirkung:** Keine - nur Production-Builds betroffen, Development läuft normal
+2. **Hybrid Router-Ansatz** (App Router + Pages Router)
+   - App Router für normale Pages (`app/` Directory)
+   - Pages Router nur für Error-Handling (`pages/_error.js`, `pages/_document.js`)
+   - Vermeidet Next.js Default Error-Pages mit styled-jsx
+
+**Implementiert:**
+- `apps/web/package.json`: Next.js 14.2.21
+- `apps/web/pages/_error.js`: Custom Error Page ohne styled-jsx
+- `apps/web/pages/_document.js`: Custom Document ohne StyleRegistry
+- `apps/web/next.config.js`: Vereinfachte Config ohne Next.js 15-spezifische Optionen
+
+**Status:** ✅ Behoben - Vercel Production Builds erfolgreich
+
+### ⚠️ Aktive Probleme
+
+*Keine aktiven Build-Blocker - alle kritischen Probleme behoben!*
 
 ### 📚 Troubleshooting & Best Practices
 
@@ -1048,6 +1103,107 @@ EXPO_PUBLIC_POSTHOG_HOST=https://app.posthog.com
 
 **WICHTIG:** Niemals `STRIPE_SECRET_KEY` in Client-Code verwenden!
 
+## 🌐 Production Deployment
+
+### GitHub Repository
+- **URL**: https://github.com/dulemin/TechMemory
+- **Branch Strategy**: `main` Branch = Production
+- **Workflow**: Feature-Branches → PR → Merge zu `main` → Auto-Deploy
+
+### Vercel Deployment
+
+#### Setup (bereits erledigt)
+1. **GitHub Integration**: Vercel App mit GitHub Repository verbunden
+2. **Root Directory**: `apps/web` (Monorepo-Setup)
+3. **Environment Variables** in Vercel Dashboard konfiguriert:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. **Automatic Deployments**: Jeder Push zu `main` triggert Build
+
+#### Live-URLs
+- **Production**: https://tech-memory-web.vercel.app
+- **Preview Deployments**: Automatisch für Pull Requests (z.B. `tech-memory-git-feature-xyz.vercel.app`)
+
+#### Deployment-Workflow
+```bash
+# Lokale Änderungen
+git add .
+git commit -m "feat(web): neue Feature"
+git push origin main
+
+# Vercel reagiert automatisch:
+# 1. Detects Push zu main
+# 2. Startet Build (~2-3 Minuten)
+# 3. Deployt zu Production URL
+# 4. Sendet Deployment-Benachrichtigung
+```
+
+#### Build-Konfiguration (Vercel)
+```json
+{
+  "buildCommand": "turbo run build",
+  "outputDirectory": "apps/web/.next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "nodeVersion": "22.x"
+}
+```
+
+#### Troubleshooting Vercel Builds
+
+**Problem: Build schlägt fehl mit "Module not found"**
+- **Ursache**: Monorepo Dependencies nicht installiert
+- **Lösung**: Vercel installiert automatisch im Root (`npm install --prefix=../..`)
+
+**Problem: Environment Variables fehlen**
+- **Lösung**: In Vercel Dashboard → Settings → Environment Variables prüfen
+- **Test**: `console.log(process.env.NEXT_PUBLIC_SUPABASE_URL)` in Code
+
+**Problem: Prerendering-Fehler**
+- **Lösung**: Siehe "Bekannte Probleme" → Next.js 15 Build-Fehler (bereits behoben)
+
+### Vercel CLI (Optional)
+
+```bash
+# Vercel CLI installieren
+npm install -g vercel
+
+# Lokalen Preview-Build testen
+cd apps/web
+vercel dev
+
+# Manuelles Deployment (falls nötig)
+vercel --prod
+```
+
+### Deployment-Checklist
+
+**Vor jedem Production-Push:**
+- [ ] TypeScript-Checks lokal erfolgreich (`npm run check-types`)
+- [ ] Lokal getestet (`npm run dev`)
+- [ ] Keine `.env` Dateien im Commit
+- [ ] CLAUDE.md updated (bei Architektur-Änderungen)
+
+**Nach Deployment:**
+- [ ] Vercel Build-Log prüfen (grünes ✓)
+- [ ] Production-URL aufrufen und Smoke-Test
+- [ ] Supabase-Connection testen (Login/Dashboard)
+
+### Rollback-Strategie
+
+**Bei fehlerhaftem Deployment:**
+1. Gehe zu Vercel Dashboard → Deployments
+2. Finde letztes funktionierendes Deployment
+3. Klicke auf "..." → "Promote to Production"
+4. Fixe Bug lokal, push neuen Commit
+
+**Alternatv (Git Revert):**
+```bash
+git revert HEAD
+git push origin main
+# Vercel deployt automatisch den Revert
+```
+
 ## 🤖 Prompt-Templates für AI-Assistenten
 
 ### Neue Feature implementieren
@@ -1173,13 +1329,18 @@ refactor(shared): extract event validation logic
 
 ---
 
-**Letzte Aktualisierung:** 2025-10-22 (05:35 Uhr)
-**Status:** Phase 7 (UX-Verbesserungen & Polish) abgeschlossen ✅ | Alle TypeScript-Errors behoben ✅ | Profil-Trigger implementiert ✅ | Bereit für Phase 8 (Stripe) oder Phase 9 (Deploy)
+**Letzte Aktualisierung:** 2025-10-22 (06:30 Uhr)
+**Status:** Phase 9 (Production Deployment) abgeschlossen ✅ | App ist LIVE auf Vercel 🎉
 **Maintainer:** Claude AI + Developer Team
 **MCP Server:** Chrome DevTools + Supabase (aktiviert)
 **Database Migrations:** 4 Migrations angewendet (initial_schema, row_level_security, storage_buckets, auto_create_profile_on_signup)
 
-**Test-URLs:**
+**Production-URLs:**
+- **🌐 LIVE APP**: https://tech-memory-web.vercel.app
+- **GitHub Repo**: https://github.com/dulemin/TechMemory
+- **Vercel Dashboard**: https://vercel.com/dulemin/tech-memory-web
+
+**Local Development URLs:**
 - Landing Page: http://localhost:3000
 - Login: http://localhost:3000/login
 - Dashboard: http://localhost:3000/dashboard
@@ -1189,3 +1350,11 @@ refactor(shared): extract event validation logic
 - **Moderation**: http://localhost:3000/events/656282ac-99d8-4e0e-85c5-a6fc60d99561/moderate
 - **Live-Wall**: http://localhost:3000/events/656282ac-99d8-4e0e-85c5-a6fc60d99561/wall
 - **Share-Seite** (öffentlich): http://localhost:3000/share/656282ac-99d8-4e0e-85c5-a6fc60d99561
+
+**Deployment-Changelog (22.10.2025):**
+- ✅ Next.js 14.2.21 (downgrade von 15.5.0 wegen Build-Issues)
+- ✅ Hybrid App/Pages Router für Error-Handling
+- ✅ GitHub Integration + Auto-Deploy
+- ✅ Vercel Build erfolgreich (~35 Sekunden)
+- ✅ Environment Variables konfiguriert
+- ✅ Middleware + Toaster funktionieren in Production
