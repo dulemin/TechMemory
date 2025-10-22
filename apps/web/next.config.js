@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const nextConfig = {
   transpilePackages: [],
   outputFileTracingRoot: path.join(__dirname, '../../'),
+  output: 'standalone', // Vercel-optimiert: SSR statt Static Export
   eslint: {
     ignoreDuringBuilds: true, // Ignore ESLint during Vercel builds (wir haben lokal schon geprüft)
   },
