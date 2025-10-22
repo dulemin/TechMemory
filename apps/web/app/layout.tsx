@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   description: "Digitales Gästebuch für Events - Videos, Fotos und Nachrichten von Gästen sammeln",
 };
 
+// Force dynamic rendering for all pages to avoid Next.js 15 prerendering errors
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 export default function RootLayout({
   children,
 }: Readonly<{
