@@ -363,7 +363,6 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
         ref={fileInputRef}
         type="file"
         accept="video/*"
-        capture="environment"
         onChange={handleFileSelect}
         className="hidden"
       />
