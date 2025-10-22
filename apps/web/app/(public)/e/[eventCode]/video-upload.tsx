@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 interface VideoUploadProps {
   eventId: string;
@@ -21,44 +19,13 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [videoDuration, setVideoDuration] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement>(null);
-  const ffmpegRef = useRef<FFmpeg | null>(null);
-
-  // FFmpeg laden (nur im Browser)
-  useEffect(() => {
-    const load = async () => {
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-
-      // FFmpeg erst hier initialisieren (nur im Browser)
-      ffmpegRef.current = new FFmpeg();
-      const ffmpeg = ffmpegRef.current;
-
-      ffmpeg.on('log', ({ message }) => {
-        console.log(message);
-      });
-
-      try {
-        await ffmpeg.load({
-          coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-          wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-        });
-        setFfmpegLoaded(true);
-      } catch (err) {
-        console.error('FFmpeg konnte nicht geladen werden:', err);
-        toast.error('Video-Kompression nicht verfügbar. Bitte verwende ein kleineres Video.');
-      }
-    };
-
-    load();
-  }, []);
 
   // Recording-Timer
   useEffect(() => {
@@ -187,45 +154,6 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     video.src = url;
   };
 
-  const compressVideo = async (file: File): Promise<Blob> => {
-    const ffmpeg = ffmpegRef.current;
-    if (!ffmpeg) {
-      throw new Error('FFmpeg nicht initialisiert');
-    }
-
-    // Timeout für FFmpeg (60 Sekunden)
-    const compressionPromise = (async () => {
-      // Input-Datei schreiben
-      await ffmpeg.writeFile('input.mp4', await fetchFile(file));
-
-      // Kompression durchführen (H.264, reduzierte Auflösung, Bitrate)
-      await ffmpeg.exec([
-        '-i', 'input.mp4',
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast', // Schnellerer Preset für Browser
-        '-crf', '28',
-        '-vf', 'scale=1280:-2',
-        '-c:a', 'aac',
-        '-b:a', '128k',
-        '-movflags', '+faststart',
-        'output.mp4'
-      ]);
-
-      // Output-Datei lesen
-      const data = await ffmpeg.readFile('output.mp4');
-      // FileData zu Uint8Array konvertieren für Blob
-      return new Blob([new Uint8Array(data as unknown as ArrayBuffer)], { type: 'video/mp4' });
-    })();
-
-    // Timeout-Promise
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Kompression Timeout (60s)')), 60000)
-    );
-
-    // Race zwischen Kompression und Timeout
-    return Promise.race([compressionPromise, timeoutPromise]);
-  };
-
   const handleUpload = async () => {
     if (!guestName || !guestName.trim()) {
       toast.error('Bitte gib zuerst deinen Namen ein');
@@ -240,30 +168,9 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     try {
       const supabase = createClient();
 
-      // 1. Video komprimieren (wenn FFmpeg verfügbar UND Video < 50MB)
-      let fileToUpload: File | Blob = selectedFile;
-      const maxCompressSize = 50 * 1024 * 1024; // 50MB Limit für Kompression
+      setUploadProgress(10);
 
-      if (ffmpegLoaded && selectedFile.size > 10 * 1024 * 1024 && selectedFile.size < maxCompressSize) {
-        setUploadProgress(10);
-        try {
-          toast.info('Komprimiere Video... Dies kann bis zu 60 Sekunden dauern.');
-          fileToUpload = await compressVideo(selectedFile);
-          toast.success('Video erfolgreich komprimiert!');
-          setUploadProgress(40);
-        } catch (compressionError) {
-          console.warn('Kompression fehlgeschlagen, verwende Original:', compressionError);
-          toast.warning('Kompression fehlgeschlagen, lade Original hoch...');
-          setUploadProgress(40);
-        }
-      } else {
-        if (selectedFile.size >= maxCompressSize) {
-          toast.info('Video zu groß für Browser-Kompression, lade Original hoch...');
-        }
-        setUploadProgress(40);
-      }
-
-      // 2. Contribution-Eintrag erstellen
+      // 1. Contribution-Eintrag erstellen
       const { data: contribution, error: insertError } = await supabase
         .from('contributions')
         .insert({
@@ -272,22 +179,22 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
           type: 'video',
           status: 'pending',
           duration_seconds: videoDuration,
-          file_size_bytes: fileToUpload.size,
+          file_size_bytes: selectedFile.size,
         })
         .select()
         .single();
 
       if (insertError) throw insertError;
 
-      setUploadProgress(50);
+      setUploadProgress(30);
 
-      // 3. Datei zu Supabase Storage hochladen
+      // 2. Datei zu Supabase Storage hochladen
       const fileName = `${contribution.id}.mp4`;
       const filePath = `${eventId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('event-media')
-        .upload(filePath, fileToUpload, {
+        .upload(filePath, selectedFile, {
           cacheControl: '3600',
           upsert: false,
         });
@@ -296,7 +203,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
 
       setUploadProgress(80);
 
-      // 4. URL in contribution speichern
+      // 3. URL in contribution speichern
       const { data: urlData } = supabase.storage
         .from('event-media')
         .getPublicUrl(filePath);
@@ -433,11 +340,11 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
         <div className="space-y-2">
           <Progress value={uploadProgress} />
           <p className="text-xs text-muted-foreground text-center">
-            {uploadProgress < 40
-              ? 'Komprimiere Video...'
+            {uploadProgress < 30
+              ? 'Bereite Upload vor...'
               : uploadProgress < 80
-                ? 'Lade hoch...'
-                : 'Fertigstelle...'}
+                ? 'Lade Video hoch...'
+                : 'Fast fertig...'}
           </p>
         </div>
       )}
