@@ -13,6 +13,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Ignore TypeScript errors during Vercel builds (shadcn/ui React-Type-Konflikt)
   },
+  // Disable styled-jsx optimization that causes prerendering issues
+  compiler: {
+    styledComponents: true,
+  },
+  // Skip build-time page generation for error pages
+  experimental: {
+    workerThreads: false,
+    cpus: 1
+  },
 };
 
 export default nextConfig;
