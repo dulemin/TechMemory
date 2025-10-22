@@ -290,6 +290,7 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 
 **Bug-Fixes:**
 - Name-Validierung in allen Upload-Komponenten (verhindert anonyme Uploads)
+- Kamera-Stream: useEffect-Hook für korrekte Video-Element-Bindung (behebt schwarzes Bild)
 - Slideshow: Info-Box unter Content (kein Overlay mehr)
 - Vollbild-Button: Text jetzt lesbar (schwarz statt weiß)
 
