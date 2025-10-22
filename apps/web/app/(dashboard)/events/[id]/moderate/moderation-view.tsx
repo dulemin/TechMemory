@@ -272,14 +272,18 @@ function ContributionCard({
       <CardContent className="space-y-4">
         {/* Content Preview */}
         {contribution.type === 'video' && contribution.content_url && (
-          <video src={contribution.content_url} controls className="w-full rounded-lg" />
+          <video
+            src={contribution.content_url}
+            controls
+            className="w-full max-h-[400px] rounded-lg object-contain bg-black"
+          />
         )}
 
         {contribution.type === 'photo' && contribution.content_url && (
           <img
             src={contribution.content_url}
             alt="Photo"
-            className="w-full rounded-lg"
+            className="w-full max-h-[400px] rounded-lg object-contain bg-muted"
           />
         )}
 
