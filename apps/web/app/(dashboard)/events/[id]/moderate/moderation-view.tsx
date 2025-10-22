@@ -128,15 +128,33 @@ export function ModerationView({
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/dashboard" className="hover:text-foreground">
+          Dashboard
+        </Link>
+        <span>/</span>
+        <Link href={`/events/${eventId}`} className="hover:text-foreground">
+          Event-Details
+        </Link>
+        <span>/</span>
+        <span className="text-foreground font-medium">Moderation</span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{eventTitle}</h1>
           <p className="text-muted-foreground">Moderiere Gast-Beiträge</p>
         </div>
-        <Link href={`/events/${eventId}/wall`}>
-          <Button>🎬 Live-Wall öffnen</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href={`/events/${eventId}`}>
+            <Button variant="outline">⚙️ Einstellungen</Button>
+          </Link>
+          <Link href={`/events/${eventId}/wall`}>
+            <Button>🎬 Live-Wall</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Tabs */}

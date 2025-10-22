@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Slideshow } from './slideshow';
 import { Gallery } from './gallery';
+import Link from 'next/link';
 
 interface Contribution {
   id: string;
@@ -125,6 +126,19 @@ export function LiveWall({
       {!isFullscreen && (
         <div className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
+              <Link href="/dashboard" className="hover:text-white">
+                Dashboard
+              </Link>
+              <span>/</span>
+              <Link href={`/events/${eventId}`} className="hover:text-white">
+                Event-Details
+              </Link>
+              <span>/</span>
+              <span className="text-white font-medium">Live-Wall</span>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold">{eventTitle}</h1>
@@ -134,6 +148,17 @@ export function LiveWall({
               </div>
 
               <div className="flex items-center gap-2">
+                {/* Navigation Buttons */}
+                <Link href={`/events/${eventId}/moderate`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-700 text-white hover:bg-gray-800"
+                  >
+                    ⚖️ Moderation
+                  </Button>
+                </Link>
+
                 {/* View Mode Toggle */}
                 <div className="flex gap-1 bg-gray-800 rounded-lg p-1">
                   <Button

@@ -64,12 +64,22 @@ export default async function EventPage({ params }: EventPageProps) {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/dashboard" className="hover:text-foreground">
+          Dashboard
+        </Link>
+        <span>/</span>
+        <Link href="/events" className="hover:text-foreground">
+          Events
+        </Link>
+        <span>/</span>
+        <span className="text-foreground font-medium">{event.title}</span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link href="/events" className="text-sm text-muted-foreground hover:underline mb-2 block">
-            ← Zurück zu allen Events
-          </Link>
           <h1 className="text-3xl font-bold">{event.title}</h1>
           {event.description && (
             <p className="text-muted-foreground mt-2">{event.description}</p>
