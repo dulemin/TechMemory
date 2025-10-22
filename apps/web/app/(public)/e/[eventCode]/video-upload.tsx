@@ -193,26 +193,37 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       throw new Error('FFmpeg nicht initialisiert');
     }
 
-    // Input-Datei schreiben
-    await ffmpeg.writeFile('input.mp4', await fetchFile(file));
+    // Timeout für FFmpeg (60 Sekunden)
+    const compressionPromise = (async () => {
+      // Input-Datei schreiben
+      await ffmpeg.writeFile('input.mp4', await fetchFile(file));
 
-    // Kompression durchführen (H.264, reduzierte Auflösung, Bitrate)
-    await ffmpeg.exec([
-      '-i', 'input.mp4',
-      '-c:v', 'libx264',
-      '-preset', 'fast',
-      '-crf', '28',
-      '-vf', 'scale=1280:-2',
-      '-c:a', 'aac',
-      '-b:a', '128k',
-      '-movflags', '+faststart',
-      'output.mp4'
-    ]);
+      // Kompression durchführen (H.264, reduzierte Auflösung, Bitrate)
+      await ffmpeg.exec([
+        '-i', 'input.mp4',
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast', // Schnellerer Preset für Browser
+        '-crf', '28',
+        '-vf', 'scale=1280:-2',
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        '-movflags', '+faststart',
+        'output.mp4'
+      ]);
 
-    // Output-Datei lesen
-    const data = await ffmpeg.readFile('output.mp4');
-    // FileData zu Uint8Array konvertieren für Blob
-    return new Blob([new Uint8Array(data as unknown as ArrayBuffer)], { type: 'video/mp4' });
+      // Output-Datei lesen
+      const data = await ffmpeg.readFile('output.mp4');
+      // FileData zu Uint8Array konvertieren für Blob
+      return new Blob([new Uint8Array(data as unknown as ArrayBuffer)], { type: 'video/mp4' });
+    })();
+
+    // Timeout-Promise
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Kompression Timeout (60s)')), 60000)
+    );
+
+    // Race zwischen Kompression und Timeout
+    return Promise.race([compressionPromise, timeoutPromise]);
   };
 
   const handleUpload = async () => {
@@ -229,19 +240,26 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     try {
       const supabase = createClient();
 
-      // 1. Video komprimieren (wenn FFmpeg verfügbar)
+      // 1. Video komprimieren (wenn FFmpeg verfügbar UND Video < 50MB)
       let fileToUpload: File | Blob = selectedFile;
+      const maxCompressSize = 50 * 1024 * 1024; // 50MB Limit für Kompression
 
-      if (ffmpegLoaded && selectedFile.size > 10 * 1024 * 1024) {
+      if (ffmpegLoaded && selectedFile.size > 10 * 1024 * 1024 && selectedFile.size < maxCompressSize) {
         setUploadProgress(10);
         try {
+          toast.info('Komprimiere Video... Dies kann bis zu 60 Sekunden dauern.');
           fileToUpload = await compressVideo(selectedFile);
+          toast.success('Video erfolgreich komprimiert!');
           setUploadProgress(40);
         } catch (compressionError) {
           console.warn('Kompression fehlgeschlagen, verwende Original:', compressionError);
+          toast.warning('Kompression fehlgeschlagen, lade Original hoch...');
           setUploadProgress(40);
         }
       } else {
+        if (selectedFile.size >= maxCompressSize) {
+          toast.info('Video zu groß für Browser-Kompression, lade Original hoch...');
+        }
         setUploadProgress(40);
       }
 
