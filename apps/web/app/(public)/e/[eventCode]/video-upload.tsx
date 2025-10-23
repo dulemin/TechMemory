@@ -24,6 +24,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const recordingTimeRef = useRef<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement>(null);
@@ -35,6 +36,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     const interval = setInterval(() => {
       setRecordingTime((prev) => {
         const newTime = prev + 1;
+        recordingTimeRef.current = newTime; // Ref aktualisieren
         // Auto-Stop bei maxDuration
         if (newTime >= maxDuration) {
           stopRecording();
@@ -63,6 +65,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
 
       setStream(mediaStream);
       setRecordingTime(0);
+      recordingTimeRef.current = 0; // Ref zurücksetzen
 
       // MediaRecorder setup
       const chunks: Blob[] = [];
@@ -82,7 +85,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
         const file = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
 
         setSelectedFile(file);
-        setVideoDuration(recordingTime);
+        setVideoDuration(recordingTimeRef.current); // Ref statt State verwenden
 
         // Preview erstellen
         const url = URL.createObjectURL(blob);
@@ -121,6 +124,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     }
     setIsRecording(false);
     setRecordingTime(0);
+    recordingTimeRef.current = 0;
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
