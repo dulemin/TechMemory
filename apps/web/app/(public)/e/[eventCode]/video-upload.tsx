@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createAnonClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -169,7 +169,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     setUploadProgress(0);
 
     try {
-      const supabase = createClient();
+      const supabase = createAnonClient();
 
       setUploadProgress(10);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createAnonClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -144,7 +144,7 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
     setUploadProgress(0);
 
     try {
-      const supabase = createClient();
+      const supabase = createAnonClient();
 
       // 1. Bild komprimieren
       setUploadProgress(10);

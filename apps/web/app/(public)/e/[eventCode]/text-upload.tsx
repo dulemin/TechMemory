@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createAnonClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -32,7 +32,7 @@ export function TextUpload({ eventId, guestName }: TextUploadProps) {
     setIsSubmitting(true);
 
     try {
-      const supabase = createClient();
+      const supabase = createAnonClient();
 
       const { error: insertError } = await supabase.from('contributions').insert({
         event_id: eventId,
