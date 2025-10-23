@@ -23,6 +23,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [recordingTime, setRecordingTime] = useState(0);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement>(null);
@@ -56,13 +57,12 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const startRecording = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: true,
       });
 
       setStream(mediaStream);
       setRecordingTime(0);
-      setRecordedChunks([]);
 
       // MediaRecorder setup
       const chunks: Blob[] = [];
@@ -121,7 +121,6 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     }
     setIsRecording(false);
     setRecordingTime(0);
-    setRecordedChunks([]);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -312,9 +311,20 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
             disabled={isUploading || isRecording}
             className="w-full"
           >
-            🎥 Aufnehmen
+            {facingMode === 'environment' ? '🎥' : '🤳'} Aufnehmen
           </Button>
         </div>
+        {/* Kamera-Wechsel */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')}
+          disabled={isUploading || isRecording}
+          className="w-full text-xs"
+        >
+          🔄 {facingMode === 'environment' ? 'Zur Frontkamera wechseln' : 'Zur Hauptkamera wechseln'}
+        </Button>
         <p className="text-xs text-muted-foreground">
           Max. {maxDuration} Sekunden • MP4, MOV, WEBM
         </p>

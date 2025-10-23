@@ -22,6 +22,7 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
   const [success, setSuccess] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,11 +50,11 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
   };
 
   // Kamera öffnen
-  const openCamera = async () => {
+  const openCamera = async (mode: 'user' | 'environment' = facingMode) => {
     try {
       setError(null);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { facingMode: mode, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
       });
 
@@ -63,6 +64,19 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
       console.error('Kamera-Zugriff fehlgeschlagen:', err);
       setError('Kamera-Zugriff verweigert. Bitte erlaube den Zugriff in deinem Browser.');
     }
+  };
+
+  // Kamera wechseln (zwischen Front- und Hauptkamera)
+  const switchCamera = async () => {
+    // Aktuellen Stream stoppen
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+
+    // Neue Kamera öffnen
+    const newMode = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(newMode);
+    await openCamera(newMode);
   };
 
   // Stream an Video-Element binden wenn verfügbar
@@ -223,6 +237,14 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
                 playsInline
                 className="w-full h-auto"
               />
+              {/* Kamera-Wechsel-Button (Overlay) */}
+              <button
+                onClick={switchCamera}
+                className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
+                aria-label="Kamera wechseln"
+              >
+                🔄
+              </button>
             </div>
 
             {/* Kamera-Buttons */}
