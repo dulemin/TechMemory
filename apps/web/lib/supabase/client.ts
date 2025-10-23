@@ -18,6 +18,12 @@ export function createAnonClient() {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'supabase-js-anon',
+        },
       },
     }
   );
