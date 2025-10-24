@@ -26,6 +26,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const recordingTimeRef = useRef<number>(0);
+  const isCancelledRef = useRef<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement>(null);
@@ -72,6 +73,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       setStream(mediaStream);
       setRecordingTime(0);
       recordingTimeRef.current = 0; // Ref zurücksetzen
+      isCancelledRef.current = false; // Flag zurücksetzen
 
       // MediaRecorder setup - versuche MP4, fallback zu WebM
       const chunks: Blob[] = [];
@@ -102,22 +104,25 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       };
 
       recorder.onstop = () => {
-        // Video-Blob erstellen mit korrektem MIME-Type
-        const blob = new Blob(chunks, { type: mimeType });
-        const file = new File([blob], `video-${Date.now()}.${fileExtension}`, { type: mimeType });
-
-        setSelectedFile(file);
-        setVideoDuration(recordingTimeRef.current); // Ref statt State verwenden
-
-        // Preview erstellen
-        const url = URL.createObjectURL(blob);
-        setPreview(url);
-
-        // Stream cleanup
+        // Stream cleanup (immer durchführen)
         mediaStream.getTracks().forEach((track) => track.stop());
         setStream(null);
 
-        toast.success('Video aufgenommen! Bereit zum Hochladen.');
+        // Nur Preview/File setzen wenn NICHT abgebrochen
+        if (!isCancelledRef.current) {
+          // Video-Blob erstellen mit korrektem MIME-Type
+          const blob = new Blob(chunks, { type: mimeType });
+          const file = new File([blob], `video-${Date.now()}.${fileExtension}`, { type: mimeType });
+
+          setSelectedFile(file);
+          setVideoDuration(recordingTimeRef.current); // Ref statt State verwenden
+
+          // Preview erstellen
+          const url = URL.createObjectURL(blob);
+          setPreview(url);
+
+          toast.success('Video aufgenommen! Bereit zum Hochladen.');
+        }
       };
 
       setMediaRecorder(recorder);
@@ -140,6 +145,8 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
 
   // Aufnahme abbrechen
   const cancelRecording = () => {
+    isCancelledRef.current = true; // Flag setzen BEVOR stop() aufgerufen wird
+
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
       mediaRecorder.stop();
     }
@@ -147,9 +154,17 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       stream.getTracks().forEach((track) => track.stop());
       setStream(null);
     }
+
     setIsRecording(false);
     setRecordingTime(0);
     recordingTimeRef.current = 0;
+
+    // Preview/File zurücksetzen
+    setSelectedFile(null);
+    setPreview(null);
+    setVideoDuration(0);
+
+    toast.info('Aufnahme abgebrochen');
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
