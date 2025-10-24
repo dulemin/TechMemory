@@ -4,48 +4,58 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand Colors - TechMemory */
+    --brand-primary: 13 40% 65%; /* #C89384 - Warmes Rosé/Terrakotta */
+    --brand-bg-start: 210 17% 98%; /* #F8F9FA */
+    --brand-bg-mid: 216 17% 95%; /* #F0F2F5 */
+    --brand-bg-end: 216 10% 92%; /* #E8EAED */
+    --brand-text-dark: 0 0% 17%; /* #2C2C2C */
+    --brand-text-mid: 0 0% 42%; /* #6B6B6B */
+    --brand-accent-red: 0 100% 63%; /* #ff4444 */
+
+    /* shadcn/ui Variables (mapped to brand colors) */
+    --background: 210 17% 98%; /* Brand BG Start */
+    --foreground: 0 0% 17%; /* Brand Text Dark */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 17%;
+    --primary: 13 40% 65%; /* Brand Primary */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 216 17% 95%; /* Brand BG Mid */
+    --secondary-foreground: 0 0% 17%;
+    --muted: 216 10% 92%; /* Brand BG End */
+    --muted-foreground: 0 0% 42%; /* Brand Text Mid */
+    --accent: 13 40% 65%; /* Brand Primary */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 63%; /* Brand Accent Red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 13 40% 65%; /* Brand Primary */
+    --input: 216 10% 92%;
+    --ring: 13 40% 65%; /* Brand Primary */
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 0 0% 10%;
+    --foreground: 210 17% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 210 17% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 210 17% 98%;
+    --primary: 13 40% 65%; /* Brand Primary bleibt gleich */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 210 17% 98%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 13 40% 65%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 63%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 13 40% 50%;
+    --input: 0 0% 20%;
+    --ring: 13 40% 65%;
   }
 }
 

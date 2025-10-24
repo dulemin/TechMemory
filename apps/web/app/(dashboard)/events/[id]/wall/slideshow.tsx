@@ -83,16 +83,16 @@ export function Slideshow({ contributions }: SlideshowProps) {
 
       {/* Info Box - unterhalb des Contents */}
       <div className="px-8 pb-8 pt-4">
-        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-gray-700">
+        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-brand-primary shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Von</p>
+              <p className="text-sm text-brand-primary">Von</p>
               <p className="text-xl font-semibold text-white">
                 {currentContribution.guest_name}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-brand-primary">
                 {currentIndex + 1} / {contributions.length}
               </p>
             </div>
@@ -106,7 +106,7 @@ export function Slideshow({ contributions }: SlideshowProps) {
           variant="outline"
           size="icon"
           onClick={goToPrev}
-          className="h-12 w-12 rounded-full bg-gray-900/80 backdrop-blur-sm border-gray-700 hover:bg-gray-800"
+          className="h-12 w-12 rounded-full bg-gray-900/80 backdrop-blur-sm border-brand-primary hover:bg-brand-primary hover:text-white shadow-lg"
         >
           ←
         </Button>
@@ -117,7 +117,7 @@ export function Slideshow({ contributions }: SlideshowProps) {
           variant="outline"
           size="icon"
           onClick={goToNext}
-          className="h-12 w-12 rounded-full bg-gray-900/80 backdrop-blur-sm border-gray-700 hover:bg-gray-800"
+          className="h-12 w-12 rounded-full bg-gray-900/80 backdrop-blur-sm border-brand-primary hover:bg-brand-primary hover:text-white shadow-lg"
         >
           →
         </Button>
@@ -129,7 +129,7 @@ export function Slideshow({ contributions }: SlideshowProps) {
           variant="outline"
           size="sm"
           onClick={() => setIsPaused(!isPaused)}
-          className="bg-gray-900/80 backdrop-blur-sm border-gray-700"
+          className="bg-gray-900/80 backdrop-blur-sm border-brand-primary text-white hover:bg-brand-primary"
         >
           {isPaused ? '▶ Play' : '⏸ Pause'}
         </Button>

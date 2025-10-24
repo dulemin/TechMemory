@@ -52,6 +52,18 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Brand Colors - Direct Access
+        brand: {
+          primary: "#C89384",
+          "primary-light": "rgba(200, 147, 132, 0.15)",
+          "primary-medium": "rgba(200, 147, 132, 0.3)",
+          "bg-start": "#F8F9FA",
+          "bg-mid": "#F0F2F5",
+          "bg-end": "#E8EAED",
+          "text-dark": "#2C2C2C",
+          "text-mid": "#6B6B6B",
+          "accent-red": "#ff4444",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

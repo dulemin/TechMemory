@@ -146,7 +146,7 @@ export default function SignupPage() {
           )}
 
           {message && (
-            <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+            <div className="text-sm text-brand-primary bg-brand-primary-light p-3 rounded-md border border-brand-primary">
               {message}
             </div>
           )}

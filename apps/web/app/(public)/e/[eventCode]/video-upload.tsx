@@ -257,7 +257,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
               />
 
               {/* Recording-Timer Overlay */}
-              <div className="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full flex items-center gap-2">
+              <div className="absolute top-4 left-4 bg-brand-accent-red text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
                 <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
                 <span className="font-mono text-lg">
                   {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')} / {Math.floor(maxDuration / 60)}:{(maxDuration % 60).toString().padStart(2, '0')}
@@ -269,7 +269,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
             <div className="flex gap-2">
               <Button
                 onClick={stopRecording}
-                className="flex-1 bg-red-600 hover:bg-red-700"
+                className="flex-1 bg-brand-accent-red hover:opacity-90 text-white"
                 size="lg"
               >
                 ⏹ Aufnahme beenden
@@ -278,6 +278,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
                 onClick={cancelRecording}
                 variant="outline"
                 size="lg"
+                className="border-white text-white hover:bg-white/10"
               >
                 Abbrechen
               </Button>

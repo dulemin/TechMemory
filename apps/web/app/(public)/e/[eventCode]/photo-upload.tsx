@@ -251,7 +251,7 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
             <div className="flex gap-2">
               <Button
                 onClick={capturePhoto}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-brand-primary hover:opacity-90 text-white"
                 size="lg"
               >
                 📸 Foto aufnehmen
@@ -260,6 +260,7 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
                 onClick={closeCamera}
                 variant="outline"
                 size="lg"
+                className="border-white text-white hover:bg-white/10"
               >
                 Abbrechen
               </Button>
@@ -340,7 +341,7 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
       )}
 
       {success && (
-        <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+        <div className="text-sm text-brand-primary bg-brand-primary-light p-3 rounded-md border border-brand-primary">
           ✓ Foto erfolgreich hochgeladen! Es wird nach Freigabe angezeigt.
         </div>
       )}
