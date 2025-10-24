@@ -174,11 +174,13 @@ export default async function EventPage({ params }: EventPageProps) {
 
       {/* Zur Moderation Button */}
       {totalPending > 0 && (
-        <Link href={`/events/${id}/moderate`}>
-          <Button className="w-full h-14 text-base bg-brand-primary hover:opacity-90 text-white shadow-lg">
-            🖼️ Zur Moderation ({totalPending})
-          </Button>
-        </Link>
+        <div className="mt-6">
+          <Link href={`/events/${id}/moderate`}>
+            <Button className="w-full h-14 text-base bg-brand-primary hover:opacity-90 text-white shadow-lg">
+              🖼️ Zur Moderation ({totalPending})
+            </Button>
+          </Link>
+        </div>
       )}
 
       {/* Action Cards Grid */}
