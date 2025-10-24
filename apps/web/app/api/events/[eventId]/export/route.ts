@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import archiver from 'archiver';
-import { Readable } from 'stream';
 
 export async function GET(
   request: NextRequest,
@@ -133,24 +132,35 @@ Dateinamen-Format: [Nummer]_[Gastname].[Dateiendung]
 `;
     archive.append(readmeContent, { name: 'README.txt' });
 
-    // 6. Archive finalisieren
-    console.log('[Export] Finalizing archive...');
-    await archive.finalize();
-    console.log('[Export] Archive finalized');
+    // 6. Archive als Buffer sammeln
+    console.log('[Export] Collecting archive data...');
+    const chunks: Buffer[] = [];
 
-    // 7. Stream als Response zurückgeben
+    archive.on('data', (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
+
+    // Warte bis Archive fertig ist
+    await new Promise<void>((resolve, reject) => {
+      archive.on('end', () => {
+        console.log('[Export] Archive finalized');
+        resolve();
+      });
+      archive.on('error', reject);
+      archive.finalize();
+    });
+
+    // 7. Alle Chunks zu einem Buffer kombinieren
+    const buffer = Buffer.concat(chunks);
+    console.log('[Export] Final buffer size:', buffer.length, 'bytes');
+
     const fileName = `${event.title.replace(/[^a-zA-Z0-9]/g, '_')}_Export.zip`;
 
-    // Archive ist bereits ein Node.js Stream, wir müssen ihn in einen ReadableStream konvertieren
-    const nodeStream = Readable.from(archive);
-
-    // @ts-ignore - ReadableStream.from ist in neueren Node-Versionen verfügbar
-    const webStream = Readable.toWeb(nodeStream);
-
-    return new NextResponse(webStream as ReadableStream, {
+    return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Length': buffer.length.toString(),
       },
     });
   } catch (error) {
