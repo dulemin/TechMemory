@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { convertWebMToMP4, needsConversion, loadFFmpeg } from '@/lib/ffmpeg';
 
 interface VideoUploadProps {
   eventId: string;
@@ -20,8 +19,6 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [videoDuration, setVideoDuration] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isConverting, setIsConverting] = useState(false);
-  const [conversionProgress, setConversionProgress] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [isInitializingCamera, setIsInitializingCamera] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -52,18 +49,6 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     return () => clearInterval(interval);
   }, [isRecording, maxDuration]);
 
-  // FFmpeg.wasm im Hintergrund vorladenstream (nur einmal)
-  useEffect(() => {
-    // Starte Preload nach 2 Sekunden (damit Seite schneller lädt)
-    const timer = setTimeout(() => {
-      loadFFmpeg().catch((err) => {
-        console.warn('[FFmpeg Preload] Failed:', err);
-        // Fehler ignorieren, wird beim Upload nochmal versucht
-      });
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // Stream an Video-Element binden wenn verfügbar
   useEffect(() => {
@@ -88,10 +73,26 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       setRecordingTime(0);
       recordingTimeRef.current = 0; // Ref zurücksetzen
 
-      // MediaRecorder setup
+      // MediaRecorder setup - versuche MP4, fallback zu WebM
       const chunks: Blob[] = [];
+
+      // Prüfe welche Formate unterstützt werden
+      let mimeType = 'video/webm'; // Fallback
+      let fileExtension = 'webm';
+
+      if (MediaRecorder.isTypeSupported('video/mp4')) {
+        mimeType = 'video/mp4';
+        fileExtension = 'mp4';
+      } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264')) {
+        mimeType = 'video/webm;codecs=h264';
+        fileExtension = 'mp4'; // WebM container mit H.264 ist quasi MP4
+      }
+
+      console.log('[MediaRecorder] Using format:', mimeType);
+
       const recorder = new MediaRecorder(mediaStream, {
-        mimeType: 'video/webm;codecs=vp9,opus',
+        mimeType,
+        videoBitsPerSecond: 2500000, // 2.5 Mbps für gute Qualität
       });
 
       recorder.ondataavailable = (event) => {
@@ -100,44 +101,23 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
         }
       };
 
-      recorder.onstop = async () => {
-        // Video-Blob erstellen
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        const webmFile = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
+      recorder.onstop = () => {
+        // Video-Blob erstellen mit korrektem MIME-Type
+        const blob = new Blob(chunks, { type: mimeType });
+        const file = new File([blob], `video-${Date.now()}.${fileExtension}`, { type: mimeType });
 
+        setSelectedFile(file);
         setVideoDuration(recordingTimeRef.current); // Ref statt State verwenden
+
+        // Preview erstellen
+        const url = URL.createObjectURL(blob);
+        setPreview(url);
 
         // Stream cleanup
         mediaStream.getTracks().forEach((track) => track.stop());
         setStream(null);
 
-        // WebM zu MP4 konvertieren für maximale Kompatibilität
-        try {
-          setIsConverting(true);
-          toast.info('Konvertiere Video zu MP4 für WhatsApp-Kompatibilität...');
-
-          const mp4File = await convertWebMToMP4(webmFile, (progress) => {
-            setConversionProgress(progress);
-          });
-
-          setSelectedFile(mp4File);
-
-          // Preview erstellen
-          const url = URL.createObjectURL(mp4File);
-          setPreview(url);
-
-          toast.success('Video erfolgreich konvertiert!');
-        } catch (err) {
-          console.error('Konvertierung fehlgeschlagen:', err);
-          toast.error('Konvertierung fehlgeschlagen. Video wird als WebM hochgeladen.');
-          // Fallback: Nutze WebM
-          setSelectedFile(webmFile);
-          const url = URL.createObjectURL(webmFile);
-          setPreview(url);
-        } finally {
-          setIsConverting(false);
-          setConversionProgress(0);
-        }
+        toast.success('Video aufgenommen! Bereit zum Hochladen.');
       };
 
       setMediaRecorder(recorder);
@@ -351,7 +331,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || isRecording || isConverting || isInitializingCamera}
+            disabled={isUploading || isRecording || isInitializingCamera}
             className="w-full"
           >
             📁 Aus Galerie
@@ -360,7 +340,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
             type="button"
             variant="outline"
             onClick={startRecording}
-            disabled={isUploading || isRecording || isConverting || isInitializingCamera}
+            disabled={isUploading || isRecording || isInitializingCamera}
             className="w-full"
           >
             {isInitializingCamera
@@ -374,25 +354,15 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
           variant="ghost"
           size="sm"
           onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')}
-          disabled={isUploading || isRecording || isConverting || isInitializingCamera}
+          disabled={isUploading || isRecording || isInitializingCamera}
           className="w-full text-xs"
         >
           🔄 {facingMode === 'environment' ? 'Zur Frontkamera wechseln' : 'Zur Hauptkamera wechseln'}
         </Button>
         <p className="text-xs text-muted-foreground">
-          Max. {maxDuration} Sekunden • Aufnahmen werden zu MP4 konvertiert
+          Max. {maxDuration} Sekunden • MP4, MOV, WEBM
         </p>
       </div>
-
-      {/* Conversion Progress */}
-      {isConverting && (
-        <div className="space-y-2">
-          <Progress value={conversionProgress} />
-          <p className="text-xs text-muted-foreground text-center">
-            Konvertiere zu MP4... {conversionProgress}%
-          </p>
-        </div>
-      )}
 
       {/* Preview */}
       {preview && (
@@ -425,10 +395,10 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
 
       <Button
         onClick={handleUpload}
-        disabled={!selectedFile || isUploading || isConverting || videoDuration > maxDuration}
+        disabled={!selectedFile || isUploading || videoDuration > maxDuration}
         className="w-full"
       >
-        {isUploading ? 'Lädt hoch...' : isConverting ? 'Konvertiere...' : 'Video hochladen'}
+        {isUploading ? 'Lädt hoch...' : 'Video hochladen'}
       </Button>
     </div>
   );
