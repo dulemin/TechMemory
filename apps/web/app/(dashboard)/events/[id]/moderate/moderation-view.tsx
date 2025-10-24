@@ -11,6 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import Link from 'next/link';
 import { MoreVertical, Check, X, Trash2, Clock, CheckCircle, XCircle, Play } from 'lucide-react';
 
@@ -136,6 +142,7 @@ export function ModerationView({
 
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [viewingContribution, setViewingContribution] = useState<Contribution | null>(null);
 
   const currentContributions =
     activeTab === 'pending' ? pendingContributions :
@@ -341,11 +348,59 @@ export function ModerationView({
                 activeTab={activeTab}
                 isSelected={selectedIds.has(contribution.id)}
                 onToggleSelect={() => toggleSelection(contribution.id)}
+                onView={() => setViewingContribution(contribution)}
               />
             ))}
           </div>
         </>
       )}
+
+      {/* View Modal */}
+      <Dialog open={!!viewingContribution} onOpenChange={(open) => !open && setViewingContribution(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          {viewingContribution && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{viewingContribution.guest_name}</DialogTitle>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(viewingContribution.created_at).toLocaleString('de-DE', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </DialogHeader>
+
+              <div className="mt-4">
+                {viewingContribution.type === 'video' && viewingContribution.content_url && (
+                  <video
+                    src={viewingContribution.content_url}
+                    controls
+                    autoPlay
+                    className="w-full rounded-lg"
+                  />
+                )}
+
+                {viewingContribution.type === 'photo' && viewingContribution.content_url && (
+                  <img
+                    src={viewingContribution.content_url}
+                    alt="Photo"
+                    className="w-full rounded-lg"
+                  />
+                )}
+
+                {viewingContribution.type === 'text' && (
+                  <div className="bg-muted p-6 rounded-lg">
+                    <p className="text-lg">{viewingContribution.text_content}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -360,6 +415,7 @@ interface ContributionCardProps {
   activeTab: 'pending' | 'approved' | 'rejected';
   isSelected: boolean;
   onToggleSelect: () => void;
+  onView: () => void;
 }
 
 function ContributionCard({
@@ -371,6 +427,7 @@ function ContributionCard({
   activeTab,
   isSelected,
   onToggleSelect,
+  onView,
 }: ContributionCardProps) {
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return 'N/A';
@@ -394,12 +451,15 @@ function ContributionCard({
   return (
     <Card className="overflow-hidden group hover:shadow-lg transition-shadow">
       {/* Thumbnail with Overlay */}
-      <div className="relative aspect-video bg-muted">
+      <div
+        className="relative aspect-video bg-muted cursor-pointer"
+        onClick={onView}
+      >
         {contribution.type === 'video' && contribution.content_url && (
           <>
             <video
               src={contribution.content_url}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover pointer-events-none"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/20">
               <div className="bg-white rounded-full p-4 shadow-lg">
@@ -407,7 +467,7 @@ function ContributionCard({
               </div>
             </div>
             {contribution.duration_seconds && (
-              <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
+              <Badge className="absolute bottom-2 right-2 bg-black/70 text-white pointer-events-none">
                 {Math.floor(contribution.duration_seconds / 60)}:{String(contribution.duration_seconds % 60).padStart(2, '0')}
               </Badge>
             )}
@@ -418,12 +478,12 @@ function ContributionCard({
           <img
             src={contribution.content_url}
             alt="Photo"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none"
           />
         )}
 
         {contribution.type === 'text' && (
-          <div className="w-full h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="w-full h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 pointer-events-none">
             <p className="text-sm text-center line-clamp-4 italic">
               "{contribution.text_content}"
             </p>
@@ -431,7 +491,7 @@ function ContributionCard({
         )}
 
         {/* Checkbox for selection (top-left) */}
-        <div className="absolute top-2 left-2">
+        <div className="absolute top-2 left-2 pointer-events-auto z-10">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -450,7 +510,7 @@ function ContributionCard({
         </div>
 
         {/* Dropdown Menu (top-right) */}
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 pointer-events-auto z-10">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
