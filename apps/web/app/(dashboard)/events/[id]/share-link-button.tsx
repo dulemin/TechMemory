@@ -21,7 +21,10 @@ interface ShareLinkButtonProps {
 export function ShareLinkButton({ eventId, eventDate, shareExpireDays }: ShareLinkButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/share/${eventId}`;
+  // Fallback auf aktuelle Domain, falls NEXT_PUBLIC_APP_URL nicht gesetzt
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : 'https://tech-memory-web.vercel.app');
+  const shareUrl = `${baseUrl}/share/${eventId}`;
 
   // Expiry-Datum berechnen
   const eventDateObj = new Date(eventDate);

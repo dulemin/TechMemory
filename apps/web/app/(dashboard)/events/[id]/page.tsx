@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { CopyLinkCard } from './copy-link-card';
 import { ExportCard } from './export-card';
+import { QRCodeCard } from './qr-code-card';
 
 interface EventPageProps {
   params: Promise<{
@@ -63,7 +64,10 @@ export default async function EventPage({ params }: EventPageProps) {
   // Letzte 3 Aktivitäten
   const recentActivities = contributions.slice(0, 3);
 
-  const guestUrl = `${process.env.NEXT_PUBLIC_APP_URL}/e/${event.event_code}`;
+  // Fallback auf aktuelle Domain, falls NEXT_PUBLIC_APP_URL nicht gesetzt
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : 'https://tech-memory-web.vercel.app');
+  const guestUrl = `${baseUrl}/e/${event.event_code}`;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto px-4">
@@ -186,21 +190,11 @@ export default async function EventPage({ params }: EventPageProps) {
       {/* Action Cards Grid */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* QR-Karten herunterladen */}
-        <Card className="hover:shadow-md transition-shadow cursor-pointer border-brand-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-brand-primary-light rounded-lg">
-                <svg className="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-brand-text-dark">QR-Karten herunterladen</h3>
-                <p className="text-sm text-brand-text-mid mt-1">PDF für Tischkarten</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <QRCodeCard
+          eventTitle={event.title}
+          eventCode={event.event_code}
+          guestUrl={guestUrl}
+        />
 
         {/* Link teilen */}
         <CopyLinkCard guestUrl={guestUrl} />
