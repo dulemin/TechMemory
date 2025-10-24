@@ -106,7 +106,7 @@ export async function GET(
         }
 
         // Extension aus URL extrahieren
-        const extension = storagePath.split('.').pop() || (contribType === 'video' ? 'mp4' : 'jpg');
+        const extension = storagePath.split('.').pop() || (contribType === 'video' ? 'webm' : 'jpg');
         const fileName = `${fileCounter[contribType].toString().padStart(3, '0')}_${contribution.guest_name}.${extension}`;
 
         // Blob zu Buffer konvertieren

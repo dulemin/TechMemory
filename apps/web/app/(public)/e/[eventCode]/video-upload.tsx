@@ -192,7 +192,9 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
       setUploadProgress(30);
 
       // 2. Datei zu Supabase Storage hochladen
-      const fileName = `${contribution.id}.mp4`;
+      // Extension vom original File extrahieren (z.B. .webm für Aufnahmen, .mp4/.mov für Galerie)
+      const fileExtension = selectedFile.name.split('.').pop() || 'webm';
+      const fileName = `${contribution.id}.${fileExtension}`;
       const filePath = `${eventId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
