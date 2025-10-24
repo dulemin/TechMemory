@@ -318,6 +318,9 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 **UI-Fixes:**
 - Spacing über "Zur Moderation" Button verbessert
 
+**QR-Code Feature:**
+- QR-Karten herunterladen: Generiert PDF mit scanbarem QR-Code für Gastzugang (qrcode + jspdf)
+
 **Was funktioniert:**
 - Video-Aufnahme: Sofort bereit zum Upload nach Recording ✅
 - Export: Korrekte Dateiendungen basierend auf MIME-Type ✅
