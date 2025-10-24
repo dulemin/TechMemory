@@ -357,7 +357,7 @@ export function ModerationView({
 
       {/* View Modal */}
       <Dialog open={!!viewingContribution} onOpenChange={(open) => !open && setViewingContribution(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+        <DialogContent className="max-w-5xl max-h-[95vh] p-6">
           {viewingContribution && (
             <>
               <DialogHeader>
@@ -373,13 +373,13 @@ export function ModerationView({
                 </p>
               </DialogHeader>
 
-              <div className="mt-4">
+              <div className="mt-4 flex items-center justify-center">
                 {viewingContribution.type === 'video' && viewingContribution.content_url && (
                   <video
                     src={viewingContribution.content_url}
                     controls
                     autoPlay
-                    className="w-full rounded-lg"
+                    className="max-w-full max-h-[70vh] rounded-lg object-contain"
                   />
                 )}
 
@@ -387,12 +387,12 @@ export function ModerationView({
                   <img
                     src={viewingContribution.content_url}
                     alt="Photo"
-                    className="w-full rounded-lg"
+                    className="max-w-full max-h-[70vh] rounded-lg object-contain"
                   />
                 )}
 
                 {viewingContribution.type === 'text' && (
-                  <div className="bg-muted p-6 rounded-lg">
+                  <div className="bg-muted p-6 rounded-lg max-w-2xl">
                     <p className="text-lg">{viewingContribution.text_content}</p>
                   </div>
                 )}
