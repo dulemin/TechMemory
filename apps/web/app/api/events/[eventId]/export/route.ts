@@ -105,13 +105,42 @@ export async function GET(
           continue; // Skip this file
         }
 
-        // Extension aus URL extrahieren
-        const extension = storagePath.split('.').pop() || (contribType === 'video' ? 'webm' : 'jpg');
-        const fileName = `${fileCounter[contribType].toString().padStart(3, '0')}_${contribution.guest_name}.${extension}`;
-
         // Blob zu Buffer konvertieren
         const arrayBuffer = await fileData.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+
+        // Extension basierend auf tatsächlichem MIME-Type bestimmen (nicht aus URL!)
+        // Dies behebt das Problem mit falsch benannten .mp4 Dateien die eigentlich .webm sind
+        let extension: string;
+        const mimeType = fileData.type;
+
+        if (contribType === 'video') {
+          // Video MIME-Type mapping
+          if (mimeType.includes('webm')) {
+            extension = 'webm';
+          } else if (mimeType.includes('mp4')) {
+            extension = 'mp4';
+          } else if (mimeType.includes('quicktime') || mimeType.includes('mov')) {
+            extension = 'mov';
+          } else {
+            // Fallback: aus URL extrahieren
+            extension = storagePath.split('.').pop() || 'webm';
+          }
+        } else {
+          // Photo MIME-Type mapping
+          if (mimeType.includes('jpeg') || mimeType.includes('jpg')) {
+            extension = 'jpg';
+          } else if (mimeType.includes('png')) {
+            extension = 'png';
+          } else if (mimeType.includes('webp')) {
+            extension = 'webp';
+          } else {
+            // Fallback: aus URL extrahieren
+            extension = storagePath.split('.').pop() || 'jpg';
+          }
+        }
+
+        const fileName = `${fileCounter[contribType].toString().padStart(3, '0')}_${contribution.guest_name}.${extension}`;
 
         archive.append(buffer, { name: `${contribType}s/${fileName}` });
         fileCounter[contribType]++;
