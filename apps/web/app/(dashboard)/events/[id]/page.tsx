@@ -67,7 +67,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const guestUrl = `${process.env.NEXT_PUBLIC_APP_URL}/e/${event.event_code}`;
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-6xl mx-auto px-4">
       {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/dashboard" className="hover:text-foreground">
