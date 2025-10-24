@@ -20,7 +20,14 @@ export function ExportCard({ eventId, eventTitle }: ExportCardProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Export fehlgeschlagen');
+        const errorMessage = errorData.error || 'Export fehlgeschlagen';
+
+        // Spezifische Fehlermeldung für keine approved Beiträge
+        if (errorMessage.includes('No approved contributions')) {
+          throw new Error('Keine freigegebenen Beiträge zum Exportieren. Bitte gib zuerst Beiträge frei.');
+        }
+
+        throw new Error(errorMessage);
       }
 
       // ZIP-Datei als Blob holen
