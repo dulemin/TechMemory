@@ -9,9 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ExportButton } from './export-button';
-import { PDFExportButton } from './pdf-export-button';
-import { ShareLinkButton } from './share-link-button';
+import { CopyLinkCard } from './copy-link-card';
+import { ExportCard } from './export-card';
 
 interface EventPageProps {
   params: Promise<{
@@ -202,26 +201,7 @@ export default async function EventPage({ params }: EventPageProps) {
         </Card>
 
         {/* Link teilen */}
-        <Card className="hover:shadow-md transition-shadow cursor-pointer border-brand-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-brand-primary-light rounded-lg">
-                <svg className="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-brand-text-dark">Link teilen</h3>
-                <p className="text-sm text-brand-text-mid mt-1">Per WhatsApp oder kopieren</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <code className="flex-1 px-3 py-1.5 bg-muted rounded text-xs break-all">
-                    {guestUrl}
-                  </code>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <CopyLinkCard guestUrl={guestUrl} />
 
         {/* Live-Wall öffnen */}
         <Link href={`/events/${id}/wall`}>
@@ -243,24 +223,7 @@ export default async function EventPage({ params }: EventPageProps) {
         </Link>
 
         {/* Als ZIP herunterladen */}
-        <Card className="hover:shadow-md transition-shadow cursor-pointer border-brand-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-brand-primary-light rounded-lg">
-                <svg className="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-brand-text-dark">Als ZIP herunterladen</h3>
-                <p className="text-sm text-brand-text-mid mt-1">Alle Videos & Fotos</p>
-                <div className="mt-3">
-                  <ExportButton eventId={id} eventTitle={event.title} />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ExportCard eventId={id} eventTitle={event.title} />
       </div>
 
       {/* Letzte Aktivität */}
