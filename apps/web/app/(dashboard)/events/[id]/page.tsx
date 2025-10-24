@@ -85,11 +85,18 @@ export default async function EventPage({ params }: EventPageProps) {
       </div>
 
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-brand-text-dark">{event.title}</h1>
-        {event.description && (
-          <p className="text-brand-text-mid mt-2">{event.description}</p>
-        )}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-brand-text-dark">{event.title}</h1>
+          {event.description && (
+            <p className="text-brand-text-mid mt-2">{event.description}</p>
+          )}
+        </div>
+        <Link href={`/events/${id}/edit`}>
+          <Button variant="outline" size="sm">
+            Bearbeiten
+          </Button>
+        </Link>
       </div>
 
       {/* Statistik-Karten mit Icons */}
