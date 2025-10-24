@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { convertWebMToMP4, needsConversion } from '@/lib/ffmpeg';
+import { convertWebMToMP4, needsConversion, loadFFmpeg } from '@/lib/ffmpeg';
 
 interface VideoUploadProps {
   eventId: string;
@@ -23,6 +23,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   const [isConverting, setIsConverting] = useState(false);
   const [conversionProgress, setConversionProgress] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isInitializingCamera, setIsInitializingCamera] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -51,6 +52,19 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     return () => clearInterval(interval);
   }, [isRecording, maxDuration]);
 
+  // FFmpeg.wasm im Hintergrund vorladenstream (nur einmal)
+  useEffect(() => {
+    // Starte Preload nach 2 Sekunden (damit Seite schneller lädt)
+    const timer = setTimeout(() => {
+      loadFFmpeg().catch((err) => {
+        console.warn('[FFmpeg Preload] Failed:', err);
+        // Fehler ignorieren, wird beim Upload nochmal versucht
+      });
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Stream an Video-Element binden wenn verfügbar
   useEffect(() => {
     if (stream && liveVideoRef.current && isRecording) {
@@ -61,11 +75,15 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
   // Video-Aufnahme starten
   const startRecording = async () => {
     try {
+      setIsInitializingCamera(true);
+      toast.info('Kamera wird gestartet...');
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: true,
       });
 
+      setIsInitializingCamera(false);
       setStream(mediaStream);
       setRecordingTime(0);
       recordingTimeRef.current = 0; // Ref zurücksetzen
@@ -128,6 +146,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
     } catch (err) {
       console.error('Kamera/Mikrofon-Zugriff fehlgeschlagen:', err);
       toast.error('Kamera/Mikrofon-Zugriff verweigert. Bitte erlaube den Zugriff in deinem Browser.');
+      setIsInitializingCamera(false);
     }
   };
 
@@ -332,7 +351,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || isRecording || isConverting}
+            disabled={isUploading || isRecording || isConverting || isInitializingCamera}
             className="w-full"
           >
             📁 Aus Galerie
@@ -341,10 +360,12 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
             type="button"
             variant="outline"
             onClick={startRecording}
-            disabled={isUploading || isRecording || isConverting}
+            disabled={isUploading || isRecording || isConverting || isInitializingCamera}
             className="w-full"
           >
-            {facingMode === 'environment' ? '🎥' : '🤳'} Aufnehmen
+            {isInitializingCamera
+              ? '⏳ Lädt...'
+              : facingMode === 'environment' ? '🎥 Aufnehmen' : '🤳 Aufnehmen'}
           </Button>
         </div>
         {/* Kamera-Wechsel */}
@@ -353,7 +374,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
           variant="ghost"
           size="sm"
           onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')}
-          disabled={isUploading || isRecording || isConverting}
+          disabled={isUploading || isRecording || isConverting || isInitializingCamera}
           className="w-full text-xs"
         >
           🔄 {facingMode === 'environment' ? 'Zur Frontkamera wechseln' : 'Zur Hauptkamera wechseln'}
