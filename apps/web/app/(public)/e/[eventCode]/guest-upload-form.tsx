@@ -13,14 +13,26 @@ interface GuestUploadFormProps {
   eventSettings: any;
 }
 
+// Standard-Fragen (immer verfügbar)
+const DEFAULT_QUESTIONS = [
+  'Keine Frage - freies Video',
+  'Was wünschst du dem Paar?',
+  'Dein bester Ehe-Rat?',
+  'Lustigste Erinnerung mit ihnen?',
+  'Was macht ihre Liebe besonders?',
+];
+
 export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps) {
   const [guestName, setGuestName] = useState('');
-  const [selectedQuestion, setSelectedQuestion] = useState<string>('');
+  const [selectedQuestion, setSelectedQuestion] = useState<string>('Keine Frage - freies Video');
 
   const allowVideo = eventSettings?.allowVideo ?? true;
   const allowPhoto = eventSettings?.allowPhoto ?? true;
   const allowText = eventSettings?.allowText ?? true;
   const customQuestions = eventSettings?.customQuestions || [];
+
+  // Kombiniere Standard-Fragen + Custom Questions vom Host
+  const allQuestions = [...DEFAULT_QUESTIONS, ...customQuestions];
 
   // Bestimme den ersten erlaubten Tab
   const defaultTab = allowVideo ? 'video' : allowPhoto ? 'photo' : 'text';
@@ -43,29 +55,6 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
         </p>
       </div>
 
-      {/* Optional: Fragen-Dropdown */}
-      {customQuestions.length > 0 && (
-        <div className="space-y-2">
-          <Label htmlFor="question">Beantworte eine Frage (optional)</Label>
-          <select
-            id="question"
-            value={selectedQuestion}
-            onChange={(e) => setSelectedQuestion(e.target.value)}
-            className="w-full p-2 border rounded-md bg-background"
-          >
-            <option value="">Keine Frage auswählen</option>
-            {customQuestions.map((question: string, index: number) => (
-              <option key={index} value={question}>
-                {question}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Wähle eine Frage aus, auf die du in deinem Beitrag eingehen möchtest
-          </p>
-        </div>
-      )}
-
       {/* Upload-Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -86,13 +75,34 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
           )}
         </TabsList>
 
+        {/* Fragen-Dropdown - IMMER sichtbar, nach Tabs */}
+        <div className="space-y-2 mt-6">
+          <Label htmlFor="question">📋 Beantworte eine Frage (optional)</Label>
+          <select
+            id="question"
+            value={selectedQuestion}
+            onChange={(e) => setSelectedQuestion(e.target.value)}
+            className="w-full p-2 border rounded-md bg-background"
+            disabled={!guestName}
+          >
+            {allQuestions.map((question: string, index: number) => (
+              <option key={index} value={question}>
+                {question}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Wähle eine Frage aus, auf die du in deinem Beitrag eingehen möchtest
+          </p>
+        </div>
+
         {allowVideo && (
           <TabsContent value="video" className="space-y-4">
             <VideoUpload
               eventId={eventId}
               guestName={guestName}
               maxDuration={eventSettings?.maxVideoDuration || 60}
-              questionAnswered={selectedQuestion || undefined}
+              questionAnswered={selectedQuestion === 'Keine Frage - freies Video' ? undefined : selectedQuestion}
             />
           </TabsContent>
         )}
@@ -103,7 +113,7 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
               eventId={eventId}
               guestName={guestName}
               maxSizeMB={eventSettings?.maxPhotoSizeMB || 5}
-              questionAnswered={selectedQuestion || undefined}
+              questionAnswered={selectedQuestion === 'Keine Frage - freies Video' ? undefined : selectedQuestion}
             />
           </TabsContent>
         )}
@@ -113,7 +123,7 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
             <TextUpload
               eventId={eventId}
               guestName={guestName}
-              questionAnswered={selectedQuestion || undefined}
+              questionAnswered={selectedQuestion === 'Keine Frage - freies Video' ? undefined : selectedQuestion}
             />
           </TabsContent>
         )}
