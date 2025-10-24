@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const { eventId } = await params;
+    console.log('[Export] Starting export for event:', eventId);
     const supabase = await createClient();
 
     // 1. Auth-Check: User muss Host des Events sein
@@ -54,11 +55,14 @@ export async function GET(
     }
 
     if (!contributions || contributions.length === 0) {
+      console.log('[Export] No approved contributions found');
       return NextResponse.json(
         { error: 'No approved contributions to export' },
         { status: 404 }
       );
     }
+
+    console.log('[Export] Found', contributions.length, 'approved contributions');
 
     // 4. ZIP-Archive erstellen
     const archive = archiver('zip', {
@@ -130,7 +134,9 @@ Dateinamen-Format: [Nummer]_[Gastname].[Dateiendung]
     archive.append(readmeContent, { name: 'README.txt' });
 
     // 6. Archive finalisieren
+    console.log('[Export] Finalizing archive...');
     await archive.finalize();
+    console.log('[Export] Archive finalized');
 
     // 7. Stream als Response zurückgeben
     const fileName = `${event.title.replace(/[^a-zA-Z0-9]/g, '_')}_Export.zip`;
