@@ -49,9 +49,9 @@ TechMemory/
 | **Realtime** | Supabase Realtime | WebSocket für Live-Wall |
 | **Payment** | Stripe | (TODO Phase 8) |
 | **Styling** | Tailwind CSS + shadcn/ui | Utility-first + Copy/Paste Components |
-| **Video-Kompression** | @ffmpeg/ffmpeg (WASM) | Client-seitig, keine Server-Kosten |
+| **Video-Aufnahme** | getUserMedia + MediaRecorder | Browser-native, Format-Erkennung (MP4/WebM+H.264/WebM) |
 | **Foto-Kompression** | browser-image-compression | Client-seitig, parallel-fähig |
-| **Kamera/Video-Aufnahme** | getUserMedia + MediaRecorder | Browser-native, mobile-optimiert |
+| **Kamera-Zugriff** | getUserMedia API | Browser-native, mobile-optimiert |
 | **Deploy** | Vercel | Next.js-optimiert, Auto-Deploy |
 | **Monorepo** | Turborepo | Caching, Vercel-Integration |
 
@@ -164,13 +164,14 @@ cd apps/web && npx shadcn@latest add <component>
 **Wichtige Dateien:**
 - Auth: `app/(auth)/login|signup/page.tsx`, `app/auth/callback/route.ts`
 - Dashboard: `app/(dashboard)/dashboard/page.tsx`, `app/(dashboard)/events/`
+- **Event-Details:** `app/(dashboard)/events/[id]/page.tsx` - Statistiken, Moderation-Button, Action-Cards
 - **Gast-Upload:** `app/(public)/e/[eventCode]/page.tsx` + Upload-Komponenten
   - `photo-upload.tsx` - Foto-Upload + In-App Kamera-Aufnahme
-  - `video-upload.tsx` - Video-Upload + In-App Video-Aufnahme
+  - `video-upload.tsx` - Video-Upload + In-App Video-Aufnahme (MediaRecorder mit Format-Erkennung)
   - `text-upload.tsx` - Text-Nachrichten
 - **Live-Wall:** `app/(dashboard)/events/[id]/wall/` - Slideshow + Gallery
 - Moderation: `app/(dashboard)/events/[id]/moderate/`
-- Export: `app/api/events/[eventId]/export/route.ts`, PDF-Export-Button
+- Export: `app/api/events/[eventId]/export/route.ts` - MIME-Type-basierte Extension-Erkennung
 - Share: `app/(public)/share/[eventId]/page.tsx`
 
 ## 🐛 Troubleshooting
@@ -296,7 +297,40 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 
 ---
 
+## 🆕 Neueste Änderungen (2025-10-24)
+
+**Video-Upload Optimierungen:**
+- ❌ FFmpeg.wasm entfernt (zu langsam: 30+ Sek Wartezeit, Vercel-Fehler)
+- ✅ MediaRecorder nutzt nun native Browser-Formate:
+  - Priorität: MP4 > WebM+H.264 > WebM (VP9 Fallback)
+  - Automatische Format-Erkennung mit `isTypeSupported()`
+  - Sofortiger Upload nach Aufnahme (keine Client-Konvertierung!)
+- ✅ Loading-States für bessere UX:
+  - "⏳ Lädt..." während Kamera initialisiert
+  - Toast-Benachrichtigungen für Feedback
+  - Buttons disabled während Initialisierung
+
+**Export-Verbesserungen:**
+- MIME-Type-basierte Extension-Erkennung (statt URL-basiert)
+- WebM-Videos bekommen korrekte `.webm` Extension im Export
+- Galerie-Videos behalten Original-Format (MP4, MOV, etc.)
+
+**UI-Fixes:**
+- Spacing über "Zur Moderation" Button verbessert
+
+**Was funktioniert:**
+- Video-Aufnahme: Sofort bereit zum Upload nach Recording ✅
+- Export: Korrekte Dateiendungen basierend auf MIME-Type ✅
+- WhatsApp-Kompatibilität: WebM+H.264 in modernen Browsern ✅
+
+**Bekannte Limitierungen:**
+- Videos können je nach Browser WebM oder MP4 sein
+- Alte Browser ohne H.264-Support → VP9 WebM (weniger kompatibel)
+- Server-seitige Konvertierung beim Export könnte später hinzugefügt werden
+
+---
+
 **Status:** Phase 9 (Deployment) ✅ | App LIVE auf Vercel 🎉
-**Letzte Aktualisierung:** 2025-10-22 (Kamera-Feature + Bug-Fixes)
+**Letzte Aktualisierung:** 2025-10-24 (Video-Format-Optimierung + UI-Fixes)
 **MCP Server:** Chrome DevTools + Supabase (aktiviert)
 **Migrations:** 4 angewendet (schema, RLS, storage, trigger)
