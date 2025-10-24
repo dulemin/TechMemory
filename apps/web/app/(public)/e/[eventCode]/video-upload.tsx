@@ -11,9 +11,10 @@ interface VideoUploadProps {
   eventId: string;
   guestName: string;
   maxDuration: number;
+  questionAnswered?: string;
 }
 
-export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProps) {
+export function VideoUpload({ eventId, guestName, maxDuration, questionAnswered }: VideoUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState<number>(0);
@@ -223,6 +224,7 @@ export function VideoUpload({ eventId, guestName, maxDuration }: VideoUploadProp
           status: 'pending',
           duration_seconds: videoDuration,
           file_size_bytes: selectedFile.size,
+          question_answered: questionAnswered || null,
         })
         .select()
         .single();

@@ -10,9 +10,10 @@ import { toast } from 'sonner';
 interface TextUploadProps {
   eventId: string;
   guestName: string;
+  questionAnswered?: string;
 }
 
-export function TextUpload({ eventId, guestName }: TextUploadProps) {
+export function TextUpload({ eventId, guestName, questionAnswered }: TextUploadProps) {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,6 +41,7 @@ export function TextUpload({ eventId, guestName }: TextUploadProps) {
         type: 'text',
         text_content: text.trim(),
         status: 'pending',
+        question_answered: questionAnswered || null,
       });
 
       if (insertError) throw insertError;

@@ -46,6 +46,7 @@ export interface Database {
           event_date: string;
           event_code: string;
           qr_code_url: string | null;
+          hero_image_url: string | null;
           settings: EventSettings;
           status: 'draft' | 'active' | 'archived';
           created_at: string;
@@ -59,6 +60,7 @@ export interface Database {
           event_date: string;
           event_code?: string;
           qr_code_url?: string | null;
+          hero_image_url?: string | null;
           settings?: EventSettings;
           status?: 'draft' | 'active' | 'archived';
           created_at?: string;
@@ -72,6 +74,7 @@ export interface Database {
           event_date?: string;
           event_code?: string;
           qr_code_url?: string | null;
+          hero_image_url?: string | null;
           settings?: EventSettings;
           status?: 'draft' | 'active' | 'archived';
           created_at?: string;
@@ -87,6 +90,7 @@ export interface Database {
           content_url: string | null;
           text_content: string | null;
           thumbnail_url: string | null;
+          question_answered: string | null;
           status: 'pending' | 'approved' | 'rejected';
           duration_seconds: number | null;
           file_size_bytes: number | null;
@@ -101,6 +105,7 @@ export interface Database {
           content_url?: string | null;
           text_content?: string | null;
           thumbnail_url?: string | null;
+          question_answered?: string | null;
           status?: 'pending' | 'approved' | 'rejected';
           duration_seconds?: number | null;
           file_size_bytes?: number | null;
@@ -115,6 +120,7 @@ export interface Database {
           content_url?: string | null;
           text_content?: string | null;
           thumbnail_url?: string | null;
+          question_answered?: string | null;
           status?: 'pending' | 'approved' | 'rejected';
           duration_seconds?: number | null;
           file_size_bytes?: number | null;
@@ -184,6 +190,7 @@ export interface EventSettings {
   maxVideoDuration: number; // seconds
   maxPhotoSizeMB: number;
   shareExpireDays: number;
+  customQuestions?: string[]; // Optional custom questions for guests to answer
 }
 
 // Helper Types

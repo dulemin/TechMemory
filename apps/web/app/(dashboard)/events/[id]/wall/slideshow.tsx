@@ -9,6 +9,7 @@ interface Contribution {
   guest_name: string;
   content_url: string | null;
   text_content: string | null;
+  question_answered: string | null;
   created_at: string;
 }
 
@@ -85,11 +86,16 @@ export function Slideshow({ contributions }: SlideshowProps) {
       <div className="px-8 pb-8 pt-4">
         <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-brand-primary shadow-lg">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               <p className="text-sm text-brand-primary">Von</p>
               <p className="text-xl font-semibold text-white">
                 {currentContribution.guest_name}
               </p>
+              {currentContribution.question_answered && (
+                <p className="text-sm text-gray-300 italic mt-1">
+                  "{currentContribution.question_answered}"
+                </p>
+              )}
             </div>
             <div className="text-right">
               <p className="text-sm text-brand-primary">

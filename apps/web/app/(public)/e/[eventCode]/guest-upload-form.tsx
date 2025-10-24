@@ -15,10 +15,12 @@ interface GuestUploadFormProps {
 
 export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps) {
   const [guestName, setGuestName] = useState('');
+  const [selectedQuestion, setSelectedQuestion] = useState<string>('');
 
   const allowVideo = eventSettings?.allowVideo ?? true;
   const allowPhoto = eventSettings?.allowPhoto ?? true;
   const allowText = eventSettings?.allowText ?? true;
+  const customQuestions = eventSettings?.customQuestions || [];
 
   // Bestimme den ersten erlaubten Tab
   const defaultTab = allowVideo ? 'video' : allowPhoto ? 'photo' : 'text';
@@ -40,6 +42,29 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
           Wie möchtest du in der Galerie erscheinen?
         </p>
       </div>
+
+      {/* Optional: Fragen-Dropdown */}
+      {customQuestions.length > 0 && (
+        <div className="space-y-2">
+          <Label htmlFor="question">Beantworte eine Frage (optional)</Label>
+          <select
+            id="question"
+            value={selectedQuestion}
+            onChange={(e) => setSelectedQuestion(e.target.value)}
+            className="w-full p-2 border rounded-md bg-background"
+          >
+            <option value="">Keine Frage auswählen</option>
+            {customQuestions.map((question: string, index: number) => (
+              <option key={index} value={question}>
+                {question}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Wähle eine Frage aus, auf die du in deinem Beitrag eingehen möchtest
+          </p>
+        </div>
+      )}
 
       {/* Upload-Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">
@@ -67,6 +92,7 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
               eventId={eventId}
               guestName={guestName}
               maxDuration={eventSettings?.maxVideoDuration || 60}
+              questionAnswered={selectedQuestion || undefined}
             />
           </TabsContent>
         )}
@@ -77,13 +103,18 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
               eventId={eventId}
               guestName={guestName}
               maxSizeMB={eventSettings?.maxPhotoSizeMB || 5}
+              questionAnswered={selectedQuestion || undefined}
             />
           </TabsContent>
         )}
 
         {allowText && (
           <TabsContent value="text" className="space-y-4">
-            <TextUpload eventId={eventId} guestName={guestName} />
+            <TextUpload
+              eventId={eventId}
+              guestName={guestName}
+              questionAnswered={selectedQuestion || undefined}
+            />
           </TabsContent>
         )}
       </Tabs>

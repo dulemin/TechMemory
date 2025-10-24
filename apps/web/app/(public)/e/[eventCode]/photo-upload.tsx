@@ -11,9 +11,10 @@ interface PhotoUploadProps {
   eventId: string;
   guestName: string;
   maxSizeMB: number;
+  questionAnswered?: string;
 }
 
-export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps) {
+export function PhotoUpload({ eventId, guestName, maxSizeMB, questionAnswered }: PhotoUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -166,6 +167,7 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB }: PhotoUploadProps)
           type: 'photo',
           status: 'pending',
           file_size_bytes: compressedFile.size,
+          question_answered: questionAnswered || null,
         })
         .select()
         .single();

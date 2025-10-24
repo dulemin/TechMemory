@@ -26,6 +26,7 @@ interface Contribution {
   guest_name: string;
   content_url: string | null;
   text_content: string | null;
+  question_answered: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   file_size_bytes?: number;
@@ -371,6 +372,11 @@ export function ModerationView({
                     minute: '2-digit',
                   })}
                 </p>
+                {viewingContribution.question_answered && (
+                  <p className="text-sm text-muted-foreground italic mt-1">
+                    "{viewingContribution.question_answered}"
+                  </p>
+                )}
               </DialogHeader>
 
               <div className="mt-4 flex items-center justify-center">
@@ -559,6 +565,11 @@ function ContributionCard({
       {/* Info Section */}
       <CardContent className="p-3">
         <h3 className="font-semibold text-sm truncate">{contribution.guest_name}</h3>
+        {contribution.question_answered && (
+          <p className="text-xs text-muted-foreground italic line-clamp-1 mt-0.5">
+            "{contribution.question_answered}"
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">
           {formatTimeAgo(contribution.created_at)} • {formatFileSize(contribution.file_size_bytes)}
         </p>
