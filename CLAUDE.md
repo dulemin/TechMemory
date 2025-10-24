@@ -246,7 +246,7 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 # Vercel deployed automatisch (~2-3 Min)
 ```
 
-**Vercel Config:** Root Directory: `apps/web`, Framework: Next.js, Node: 22.x
+**Vercel Config:** Root Directory: `apps/web`, Framework: Next.js, Node: 22.x, Environment Variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL` (https://tech-memory-web.vercel.app)
 
 **Deployment-Checklist:**
 - [ ] `npm run check-types` erfolgreich
