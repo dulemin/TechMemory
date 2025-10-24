@@ -334,7 +334,21 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 
 ---
 
+---
+
+## 🆕 Neueste Änderungen (2025-10-25)
+
+**Moderationsseite Redesign:**
+- Grid-Layout (3 Spalten) mit kompakten Thumbnails statt vertikale Cards
+- Pill-Style Tabs mit Icons (Clock, CheckCircle, XCircle) und Badges
+- Mehrfachauswahl: Checkboxen + "Alle auswählen" + Bulk-Actions (Freigeben/Ablehnen/Löschen)
+- 3-Punkt-Menü (Dropdown) statt separate Buttons
+- Modal-Viewer: Klick auf Foto/Video öffnet Modal mit autoPlay, max-h-[70vh] für Viewport-fit
+- shadcn dropdown-menu Komponente installiert
+
+---
+
 **Status:** Phase 9 (Deployment) ✅ | App LIVE auf Vercel 🎉
-**Letzte Aktualisierung:** 2025-10-24 (Video-Format-Optimierung + UI-Fixes)
+**Letzte Aktualisierung:** 2025-10-25 (Moderation Redesign + Modal-Viewer)
 **MCP Server:** Chrome DevTools + Supabase (aktiviert)
 **Migrations:** 4 angewendet (schema, RLS, storage, trigger)
