@@ -350,9 +350,11 @@ export function VideoUpload({ eventId, guestName, maxDuration, questionAnswered 
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading || isRecording || isInitializingCamera}
-            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-200 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Image className="w-12 h-12 text-[#d4a5a5]" />
+            <div className="w-16 h-16 rounded-full bg-[#FCF7F5] flex items-center justify-center">
+              <Image className="w-7 h-7 text-[#d4a5a5]" />
+            </div>
             <span className="text-sm font-medium text-muted-foreground">Aus Galerie</span>
           </button>
 
@@ -361,9 +363,11 @@ export function VideoUpload({ eventId, guestName, maxDuration, questionAnswered 
             type="button"
             onClick={startRecording}
             disabled={isUploading || isRecording || isInitializingCamera}
-            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-200 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Video className="w-12 h-12 text-[#d4a5a5]" />
+            <div className="w-16 h-16 rounded-full bg-[#FCF7F5] flex items-center justify-center">
+              <Video className="w-7 h-7 text-[#d4a5a5]" />
+            </div>
             <span className="text-sm font-medium text-muted-foreground">
               {isInitializingCamera ? '⏳ Lädt...' : 'Aufnehmen'}
             </span>

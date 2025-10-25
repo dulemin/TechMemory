@@ -293,9 +293,11 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB, questionAnswered }:
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-200 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Image className="w-12 h-12 text-[#d4a5a5]" />
+            <div className="w-16 h-16 rounded-full bg-[#FCF7F5] flex items-center justify-center">
+              <Image className="w-7 h-7 text-[#d4a5a5]" />
+            </div>
             <span className="text-sm font-medium text-muted-foreground">Aus Galerie</span>
           </button>
 
@@ -304,9 +306,11 @@ export function PhotoUpload({ eventId, guestName, maxSizeMB, questionAnswered }:
             type="button"
             onClick={openCamera}
             disabled={isUploading}
-            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-200 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Camera className="w-12 h-12 text-[#d4a5a5]" />
+            <div className="w-16 h-16 rounded-full bg-[#FCF7F5] flex items-center justify-center">
+              <Camera className="w-7 h-7 text-[#d4a5a5]" />
+            </div>
             <span className="text-sm font-medium text-muted-foreground">Aufnehmen</span>
           </button>
         </div>
