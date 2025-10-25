@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Video, Camera, MessageSquare } from 'lucide-react';
 import { VideoUpload } from './video-upload';
 import { PhotoUpload } from './photo-upload';
 import { TextUpload } from './text-upload';
@@ -58,39 +66,42 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
           <button
             onClick={() => setActiveTab('video')}
             disabled={!guestName}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
               activeTab === 'video'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            📹 Video
+            <Video className="w-4 h-4" />
+            Video
           </button>
         )}
         {allowPhoto && (
           <button
             onClick={() => setActiveTab('photo')}
             disabled={!guestName}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
               activeTab === 'photo'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            📷 Foto
+            <Camera className="w-4 h-4" />
+            Foto
           </button>
         )}
         {allowText && (
           <button
             onClick={() => setActiveTab('text')}
             disabled={!guestName}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
               activeTab === 'text'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            ✍️ Nachricht
+            <MessageSquare className="w-4 h-4" />
+            Nachricht
           </button>
         )}
       </div>
@@ -98,19 +109,22 @@ export function GuestUploadForm({ eventId, eventSettings }: GuestUploadFormProps
       {/* Fragen-Dropdown - IMMER sichtbar, zwischen Tabs und Upload */}
       <div className="space-y-2">
         <Label htmlFor="question">📋 Beantworte eine Frage (optional)</Label>
-        <select
-          id="question"
+        <Select
           value={selectedQuestion}
-          onChange={(e) => setSelectedQuestion(e.target.value)}
-          className="w-full p-2 border rounded-md bg-background"
+          onValueChange={setSelectedQuestion}
           disabled={!guestName}
         >
-          {allQuestions.map((question: string, index: number) => (
-            <option key={index} value={question}>
-              {question}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Wähle eine Frage aus" />
+          </SelectTrigger>
+          <SelectContent>
+            {allQuestions.map((question: string, index: number) => (
+              <SelectItem key={index} value={question}>
+                {question}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <p className="text-xs text-muted-foreground">
           Wähle eine Frage aus, auf die du in deinem Beitrag eingehen möchtest
         </p>

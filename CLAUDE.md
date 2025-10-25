@@ -346,9 +346,22 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 - Modal-Viewer: Klick auf Foto/Video öffnet Modal mit autoPlay, max-h-[70vh] für Viewport-fit
 - shadcn dropdown-menu Komponente installiert
 
+**Gast-Upload Fragen-Dropdown:**
+- 5 Standard-Fragen immer verfügbar (DEFAULT_QUESTIONS): "Keine Frage - freies Video", "Was wünschst du dem Paar?", "Dein bester Ehe-Rat?", "Lustigste Erinnerung mit ihnen?", "Was macht ihre Liebe besonders?"
+- Kombiniert mit customQuestions vom Host, Position zwischen Tabs und Upload-Bereich
+- Radix Tabs ersetzt durch manuelle Tab-Buttons (Fix für Dropdown-Clickability)
+- shadcn Select-Komponente statt natives <select> (besseres Styling)
+
+**Upload-UI Redesign:**
+- Card-basierte Upload-Buttons (Video/Foto) mit gestrichelten Rahmen (`border-gray-300`)
+- Lucide React Icons statt Emojis: Image (Galerie), Video/Camera (Aufnehmen)
+- Icon-Farbe: Rosa/Beige (`#d4a5a5`), Größe: `w-12 h-12`
+- Tab-Buttons mit Lucide Icons: Video, Camera, MessageSquare (16px, links vom Text)
+- Minimalistisches Design ohne Hintergrund-Kreise
+
 ---
 
 **Status:** Phase 9 (Deployment) ✅ | App LIVE auf Vercel 🎉
-**Letzte Aktualisierung:** 2025-10-25 (Moderation Redesign + Modal-Viewer)
+**Letzte Aktualisierung:** 2025-10-25 (Gast-Upload UI Redesign)
 **MCP Server:** Chrome DevTools + Supabase (aktiviert)
 **Migrations:** 4 angewendet (schema, RLS, storage, trigger)

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { Image, Video } from 'lucide-react';
 
 interface VideoUploadProps {
   eventId: string;
@@ -341,29 +342,32 @@ export function VideoUpload({ eventId, guestName, maxDuration, questionAnswered 
       />
 
       {/* Upload-Buttons */}
-      <div className="space-y-2">
+      <div className="space-y-4">
         <Label>Video auswählen</Label>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
+        <div className="grid grid-cols-2 gap-4">
+          {/* Aus Galerie Card */}
+          <button
             type="button"
-            variant="outline"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading || isRecording || isInitializingCamera}
-            className="w-full"
+            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            📁 Aus Galerie
-          </Button>
-          <Button
+            <Image className="w-12 h-12 text-[#d4a5a5]" />
+            <span className="text-sm font-medium text-muted-foreground">Aus Galerie</span>
+          </button>
+
+          {/* Aufnehmen Card */}
+          <button
             type="button"
-            variant="outline"
             onClick={startRecording}
             disabled={isUploading || isRecording || isInitializingCamera}
-            className="w-full"
+            className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-gray-300 rounded-lg hover:bg-muted/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isInitializingCamera
-              ? '⏳ Lädt...'
-              : facingMode === 'environment' ? '🎥 Aufnehmen' : '🤳 Aufnehmen'}
-          </Button>
+            <Video className="w-12 h-12 text-[#d4a5a5]" />
+            <span className="text-sm font-medium text-muted-foreground">
+              {isInitializingCamera ? '⏳ Lädt...' : 'Aufnehmen'}
+            </span>
+          </button>
         </div>
         {/* Kamera-Wechsel */}
         <Button
@@ -372,11 +376,11 @@ export function VideoUpload({ eventId, guestName, maxDuration, questionAnswered 
           size="sm"
           onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')}
           disabled={isUploading || isRecording || isInitializingCamera}
-          className="w-full text-xs"
+          className="w-full text-sm text-muted-foreground"
         >
           🔄 {facingMode === 'environment' ? 'Zur Frontkamera wechseln' : 'Zur Hauptkamera wechseln'}
         </Button>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground text-center">
           Max. {maxDuration} Sekunden • MP4, MOV, WEBM
         </p>
       </div>
