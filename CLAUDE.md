@@ -353,15 +353,21 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
 - shadcn Select-Komponente statt natives <select> (besseres Styling)
 
 **Upload-UI Redesign:**
-- Card-basierte Upload-Buttons (Video/Foto) mit gestrichelten Rahmen (`border-gray-300`)
-- Lucide React Icons statt Emojis: Image (Galerie), Video/Camera (Aufnehmen)
-- Icon-Farbe: Rosa/Beige (`#d4a5a5`), Größe: `w-12 h-12`
+- Card-basierte Upload-Buttons (Video/Foto) mit gestrichelten Rahmen (`border-gray-200`)
+- Lucide React Icons mit runden Kreisen (#FCF7F5): Image (Galerie), Video/Camera (Aufnehmen)
+- Icon-Farbe: Rosa/Beige (`#d4a5a5`), Icon: 28px, Kreis: 64px
 - Tab-Buttons mit Lucide Icons: Video, Camera, MessageSquare (16px, links vom Text)
-- Minimalistisches Design ohne Hintergrund-Kreise
+
+**Hero-Bereich (Gast-Upload-Seite):**
+- "Hochzeit" Badge mit Herz-Icon (oben)
+- Ring-Emoji 💍 vor Datum
+- Countdown-Badge: Berechnet Tage bis Event ("Noch X Tage bis zur Hochzeit")
+  - Bei Tag X: "🎉 Heute ist der große Tag! 🎉"
+  - Nach Event: "Die Hochzeit war wundervoll!"
 
 ---
 
 **Status:** Phase 9 (Deployment) ✅ | App LIVE auf Vercel 🎉
-**Letzte Aktualisierung:** 2025-10-25 (Gast-Upload UI Redesign)
+**Letzte Aktualisierung:** 2025-10-25 (Hero-Bereich + Upload UI Redesign)
 **MCP Server:** Chrome DevTools + Supabase (aktiviert)
 **Migrations:** 4 angewendet (schema, RLS, storage, trigger)
