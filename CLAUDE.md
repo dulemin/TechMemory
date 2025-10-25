@@ -365,9 +365,19 @@ git add . && git commit -m "feat: neue Feature" && git push origin main
   - Bei Tag X: "🎉 Heute ist der große Tag! 🎉"
   - Nach Event: "Die Hochzeit war wundervoll!"
 
+**Live-Wall UX Verbesserungen:**
+- Slideshow: Viewport-fit ohne Scrollen
+  - Container: `h-screen` + `overflow-hidden` für exakte Viewport-Höhe
+  - Content: `max-h-[calc(100vh-180px)]` begrenzt Videos/Fotos auf Viewport minus Info-Box
+  - Info-Box kompakter: Kleinere Paddings (p-3), kleinere Schrift (text-lg/xs), `shrink-0`
+  - Text-Content: Kleinere Schrift (text-2xl) für besseren Fit
+- Moderation-Button: Jetzt sofort sichtbar
+  - Brand-Primary Farbschema: `border-brand-primary`, `bg-brand-primary/10`, `text-brand-primary`
+  - Hebt sich deutlich vom dunklen Hintergrund ab (vorher unsichtbar mit Grautönen)
+
 ---
 
 **Status:** Phase 9 (Deployment) ✅ | App LIVE auf Vercel 🎉
-**Letzte Aktualisierung:** 2025-10-25 (Hero-Bereich + Upload UI Redesign)
+**Letzte Aktualisierung:** 2025-10-25 (Live-Wall UX Verbesserungen)
 **MCP Server:** Chrome DevTools + Supabase (aktiviert)
 **Migrations:** 4 angewendet (schema, RLS, storage, trigger)
