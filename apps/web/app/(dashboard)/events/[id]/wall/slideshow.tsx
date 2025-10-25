@@ -48,51 +48,51 @@ export function Slideshow({ contributions }: SlideshowProps) {
   if (!currentContribution) return null;
 
   return (
-    <div className="h-full relative flex flex-col bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      {/* Contribution Content - nimmt verfügbaren Platz */}
-      <div className="flex-1 flex items-center justify-center p-8 overflow-hidden">
+    <div className="h-screen relative flex flex-col bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-hidden">
+      {/* Contribution Content - begrenzte Höhe für Viewport-fit */}
+      <div className="flex-1 flex items-center justify-center p-6 min-h-0">
         {currentContribution.type === 'video' && currentContribution.content_url && (
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-4xl h-full flex items-center justify-center">
             <video
               key={currentContribution.id}
               src={currentContribution.content_url}
               controls
               autoPlay
-              className="w-full h-auto max-h-full rounded-lg shadow-2xl"
+              className="w-full max-h-[calc(100vh-180px)] object-contain rounded-lg shadow-2xl"
             />
           </div>
         )}
 
         {currentContribution.type === 'photo' && currentContribution.content_url && (
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-4xl h-full flex items-center justify-center">
             <img
               src={currentContribution.content_url}
               alt={`Foto von ${currentContribution.guest_name}`}
-              className="w-full h-auto max-h-full object-contain rounded-lg shadow-2xl"
+              className="w-full max-h-[calc(100vh-180px)] object-contain rounded-lg shadow-2xl"
             />
           </div>
         )}
 
         {currentContribution.type === 'text' && (
-          <div className="max-w-3xl bg-gray-800/50 backdrop-blur-sm rounded-2xl p-12 shadow-2xl border border-gray-700">
-            <p className="text-3xl leading-relaxed text-gray-100 text-center italic">
+          <div className="max-w-3xl bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-gray-700">
+            <p className="text-2xl leading-relaxed text-gray-100 text-center italic">
               "{currentContribution.text_content}"
             </p>
           </div>
         )}
       </div>
 
-      {/* Info Box - unterhalb des Contents */}
-      <div className="px-8 pb-8 pt-4">
-        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-brand-primary shadow-lg">
+      {/* Info Box - kompakt am unteren Rand */}
+      <div className="px-6 pb-6 pt-3 shrink-0">
+        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 border border-brand-primary shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm text-brand-primary">Von</p>
-              <p className="text-xl font-semibold text-white">
+              <p className="text-xs text-brand-primary">Von</p>
+              <p className="text-lg font-semibold text-white">
                 {currentContribution.guest_name}
               </p>
               {currentContribution.question_answered && (
-                <p className="text-sm text-gray-300 italic mt-1">
+                <p className="text-xs text-gray-300 italic mt-1">
                   "{currentContribution.question_answered}"
                 </p>
               )}

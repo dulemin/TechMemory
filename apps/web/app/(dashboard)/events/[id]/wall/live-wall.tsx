@@ -155,7 +155,7 @@ export function LiveWall({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    className="border-brand-primary bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white"
                   >
                     ⚖️ Moderation
                   </Button>
